@@ -919,27 +919,6 @@ export default function Home() {
             LIVE FEED <b>{weather.status === "live" || radar.status === "live" ? "ONLINE" : weather.status === "loading" || radar.status === "loading" ? "LINKING" : "SIMULATION"}</b>
           </div>
           <button
-            onClick={() => { setSystemHubTab("ml"); setSystemHubOpen(true); }}
-            style={{
-              background: "rgba(56, 189, 248, 0.12)",
-              border: "1px solid rgba(56, 189, 248, 0.35)",
-              borderRadius: "4px",
-              padding: "4px 10px",
-              color: "#38BDF8",
-              fontSize: "10px",
-              fontFamily: "'IBM Plex Mono', monospace",
-              fontWeight: 700,
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              gap: "6px",
-            }}
-            title="Inspect ConvGRU ML architecture, PyTorch training script, and checkpoint storage"
-          >
-            <Sparkles size={12} />
-            <span>ML & DATA HUB</span>
-          </button>
-          <button
             onClick={() => setTrainingStudioOpen(true)}
             style={{
               background: "linear-gradient(135deg, rgba(34, 197, 94, 0.2) 0%, rgba(6, 182, 212, 0.3) 100%)",

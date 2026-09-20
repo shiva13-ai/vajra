@@ -27,7 +27,7 @@
       "accuracy": 0.8125,
       "log_loss": 0.3845,
       "f1_score": 0.8204,
-      "size_bytes": 437676,
+      "size_bytes": 443690,
       "feature_importances": {
         "cape_jkg": 0.2536,
         "lifted_index": 0.1825,
@@ -40,7 +40,7 @@
         "temperature_c": 0.0308,
         "wind_gust_kmh": 0.0304
       },
-      "last_updated": "2026-09-06T22:01:21.846295"
+      "last_updated": "2026-09-12T21:59:28.283232"
     },
     "lightgbm_cloudburst": {
       "file": "lightgbm_cloudburst.txt",
@@ -62,7 +62,7 @@
         "elevation_m": 67.0,
         "hail_prob_pct": 60.0
       },
-      "last_updated": "2026-09-06T22:01:21.846295"
+      "last_updated": "2026-09-12T21:59:28.283232"
     },
     "xgboost_hail": {
       "file": "xgboost_hail.json",
@@ -70,8 +70,8 @@
       "task": "Severe Hail Core Prediction",
       "roc_auc": 0.9704,
       "accuracy": 0.9433,
-      "size_bytes": 394991,
-      "last_updated": "2026-09-06T22:01:21.846295"
+      "size_bytes": 401000,
+      "last_updated": "2026-09-12T21:59:28.283232"
     }
   },
   "summary": {},
@@ -79,8 +79,8 @@
   "last_auto_persisted_at": "2026-09-06T17:57:21.188488",
   "current_mean_log_loss": 0.5072,
   "continuous_self_learning_active": true,
-  "continuous_learning_step": 50,
-  "last_self_learning_at": "2026-09-06T22:01:21.846295",
+  "continuous_learning_step": 57,
+  "last_self_learning_at": "2026-09-12T21:59:28.283232",
   "auto_self_learning_active": true,
   "loss_history": [
     {
@@ -532,7 +532,70 @@
       "log_loss_cb": 0.01847,
       "log_loss_hail": 0.01314,
       "samples_verified": 112
+    },
+    {
+      "step": 51,
+      "timestamp": "21:28:44",
+      "log_loss_combined": 0.0184,
+      "log_loss_ts": 0.0246,
+      "log_loss_cb": 0.01847,
+      "log_loss_hail": 0.01212,
+      "samples_verified": 112
+    },
+    {
+      "step": 52,
+      "timestamp": "21:33:29",
+      "log_loss_combined": 0.01722,
+      "log_loss_ts": 0.02204,
+      "log_loss_cb": 0.01849,
+      "log_loss_hail": 0.01113,
+      "samples_verified": 20
+    },
+    {
+      "step": 53,
+      "timestamp": "21:38:37",
+      "log_loss_combined": 0.01709,
+      "log_loss_ts": 0.02173,
+      "log_loss_cb": 0.01847,
+      "log_loss_hail": 0.01106,
+      "samples_verified": 112
+    },
+    {
+      "step": 54,
+      "timestamp": "21:44:37",
+      "log_loss_combined": 0.01624,
+      "log_loss_ts": 0.0199,
+      "log_loss_cb": 0.01847,
+      "log_loss_hail": 0.01035,
+      "samples_verified": 56
+    },
+    {
+      "step": 55,
+      "timestamp": "21:49:28",
+      "log_loss_combined": 0.0158,
+      "log_loss_ts": 0.01893,
+      "log_loss_cb": 0.01849,
+      "log_loss_hail": 0.00998,
+      "samples_verified": 20
+    },
+    {
+      "step": 56,
+      "timestamp": "21:54:30",
+      "log_loss_combined": 0.01568,
+      "log_loss_ts": 0.01867,
+      "log_loss_cb": 0.01847,
+      "log_loss_hail": 0.0099,
+      "samples_verified": 112
+    },
+    {
+      "step": 57,
+      "timestamp": "21:59:28",
+      "log_loss_combined": 0.01501,
+      "log_loss_ts": 0.01723,
+      "log_loss_cb": 0.01849,
+      "log_loss_hail": 0.00932,
+      "samples_verified": 20
     }
   ],
-  "last_updated_at": "2026-09-06T22:01:22.151172"
+  "last_updated_at": "2026-09-12T21:59:28.598571"
 }
