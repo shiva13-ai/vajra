@@ -27,7 +27,7 @@
       "accuracy": 0.8125,
       "log_loss": 0.3845,
       "f1_score": 0.8204,
-      "size_bytes": 443690,
+      "size_bytes": 79895,
       "feature_importances": {
         "cape_jkg": 0.2536,
         "lifted_index": 0.1825,
@@ -40,7 +40,7 @@
         "temperature_c": 0.0308,
         "wind_gust_kmh": 0.0304
       },
-      "last_updated": "2026-09-12T21:59:28.283232"
+      "last_updated": "2026-09-25T17:36:04.698074"
     },
     "lightgbm_cloudburst": {
       "file": "lightgbm_cloudburst.txt",
@@ -49,7 +49,7 @@
       "roc_auc": 0.987,
       "accuracy": 0.9458,
       "log_loss": 0.1266,
-      "size_bytes": 322283,
+      "size_bytes": 96835,
       "feature_importances": {
         "rain_rate_mmhr": 473.0,
         "humidity_pct": 471.0,
@@ -62,7 +62,7 @@
         "elevation_m": 67.0,
         "hail_prob_pct": 60.0
       },
-      "last_updated": "2026-09-12T21:59:28.283232"
+      "last_updated": "2026-09-25T17:36:04.698074"
     },
     "xgboost_hail": {
       "file": "xgboost_hail.json",
@@ -70,8 +70,8 @@
       "task": "Severe Hail Core Prediction",
       "roc_auc": 0.9704,
       "accuracy": 0.9433,
-      "size_bytes": 401000,
-      "last_updated": "2026-09-12T21:59:28.283232"
+      "size_bytes": 53524,
+      "last_updated": "2026-09-25T17:36:04.698074"
     }
   },
   "summary": {},
@@ -79,8 +79,8 @@
   "last_auto_persisted_at": "2026-09-06T17:57:21.188488",
   "current_mean_log_loss": 0.5072,
   "continuous_self_learning_active": true,
-  "continuous_learning_step": 57,
-  "last_self_learning_at": "2026-09-12T21:59:28.283232",
+  "continuous_learning_step": 62,
+  "last_self_learning_at": "2026-09-25T17:36:04.698074",
   "auto_self_learning_active": true,
   "loss_history": [
     {
@@ -595,7 +595,65 @@
       "log_loss_cb": 0.01849,
       "log_loss_hail": 0.00932,
       "samples_verified": 20
+    },
+    {
+      "step": 58,
+      "timestamp": "23:39:22",
+      "log_loss_combined": 1.08765,
+      "benchmark_loss": 0.15998,
+      "gatekeeper_status": "PROMOTED",
+      "champion_benchmark_loss": 0.78229,
+      "challenger_benchmark_loss": 0.15998,
+      "samples_verified": 64,
+      "grids_monitored": 64
+    },
+    {
+      "step": 59,
+      "timestamp": "23:52:23",
+      "log_loss_combined": 1.40589,
+      "benchmark_loss": 0.12557,
+      "gatekeeper_status": "PROMOTED",
+      "champion_benchmark_loss": 0.15998,
+      "challenger_benchmark_loss": 0.12557,
+      "samples_verified": 64,
+      "grids_monitored": 64
+    },
+    {
+      "step": 60,
+      "timestamp": "17:26:16",
+      "log_loss_combined": 0.0238,
+      "benchmark_loss": 0.1135,
+      "gatekeeper_status": "PROMOTED",
+      "champion_benchmark_loss": 0.12557,
+      "challenger_benchmark_loss": 0.1135,
+      "samples_verified": 56,
+      "grids_monitored": 56
+    },
+    {
+      "step": 61,
+      "timestamp": "17:31:22",
+      "log_loss_combined": 0.01709,
+      "benchmark_loss": 0.11256,
+      "gatekeeper_status": "PROMOTED",
+      "champion_benchmark_loss": 0.1135,
+      "challenger_benchmark_loss": 0.11256,
+      "samples_verified": 56,
+      "grids_monitored": 56
+    },
+    {
+      "step": 62,
+      "timestamp": "17:36:06",
+      "log_loss_combined": 0.01409,
+      "benchmark_loss": 0.11118,
+      "gatekeeper_status": "PROMOTED",
+      "champion_benchmark_loss": 0.11256,
+      "challenger_benchmark_loss": 0.11118,
+      "samples_verified": 56,
+      "grids_monitored": 56
     }
   ],
-  "last_updated_at": "2026-09-12T21:59:28.598571"
+  "last_updated_at": "2026-09-25T17:36:06.388819",
+  "gatekeeper_status": "PROMOTED",
+  "total_grids_monitored": 56,
+  "all_india_coverage_pct": 87.5
 }

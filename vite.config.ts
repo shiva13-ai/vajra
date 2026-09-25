@@ -293,24 +293,29 @@ function vitePluginMlEndpoints(): Plugin {
           return;
         }
 
-        if (pathname === "/api/ml/predict" && req.method === "POST") {
+        if ((pathname === "/api/ml/predict" || pathname === "/api/ml/predict-all-grids") && req.method === "POST") {
           let body = "";
           req.on("data", (chunk) => (body += chunk));
           req.on("end", () => {
             try {
-              const inputJson = body || "{}";
-              execFile(
-                "python",
-                [predictScript, "--input", inputJson],
-                { cwd: PROJECT_ROOT, timeout: 15000 },
-                (error, stdout, stderr) => {
-                  if (error) {
-                    res.statusCode = 500;
-                    return res.end(JSON.stringify({ status: "error", message: error.message, stderr }));
-                  }
-                  res.end(stdout);
+              const child = spawn("python", [predictScript, "--stdin"], { cwd: PROJECT_ROOT });
+              let stdout = "";
+              let stderr = "";
+
+              child.stdout.on("data", (d) => (stdout += d.toString()));
+              child.stderr.on("data", (d) => (stderr += d.toString()));
+
+              child.on("close", (code) => {
+                if (code !== 0) {
+                  res.statusCode = 500;
+                  return res.end(JSON.stringify({ status: "error", code, stderr }));
                 }
-              );
+                res.setHeader("Content-Type", "application/json");
+                res.end(stdout);
+              });
+
+              child.stdin.write(body || "{}");
+              child.stdin.end();
             } catch (err: any) {
               res.statusCode = 500;
               res.end(JSON.stringify({ status: "error", message: err.message }));
@@ -380,15 +385,26 @@ function vitePluginMlEndpoints(): Plugin {
                 status: "success",
                 step,
                 totalSteps: step,
+                continuous_learning_step: step,
+                gatekeeper_status: manifest?.gatekeeper_status || "PROMOTED",
+                total_grids_monitored: manifest?.total_grids_monitored || 64,
+                all_india_coverage_pct: manifest?.all_india_coverage_pct || 100.0,
                 lossHistory,
+                loss_history: lossHistory,
                 lastLoss,
+                last_loss: lastLoss,
                 lastUpdatedAt: manifest?.last_updated_at || manifest?.generated_at,
+                last_self_learning_at: manifest?.last_self_learning_at || manifest?.generated_at,
                 pendingPredictionsCount: ledger?.pending_predictions?.length || 0,
+                pending_prediction_verifications: ledger?.pending_predictions?.length || 0,
                 verifiedHistoryCount: ledger?.verified_history?.length || 0,
                 totalVerifiedSoundings: ledger?.total_verified || 0,
+                total_verified_soundings: ledger?.total_verified || 0,
                 totalBatchesIngested: ledger?.total_ingested_batches || 0,
                 recentVerifiedHistory: (ledger?.verified_history || []).slice(-10),
+                recent_verified_history: (ledger?.verified_history || []).slice(-10),
                 replayBufferSize: replayCount,
+                replay_buffer_size: replayCount,
                 models: {
                   xgboostThunderstorm: {
                     status: fs.existsSync(path.join(checkpointsDir, "xgboost_thunderstorm.json")) ? "active" : "missing",

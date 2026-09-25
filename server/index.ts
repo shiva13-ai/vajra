@@ -7,6 +7,7 @@ import {
   getMlCheckpoints,
   postMlTrain,
   postMlPredict,
+  postMlPredictAllGrids,
   postContinuousLearnIngest,
   getContinuousLearnStatus,
 } from "./mlController.js";
@@ -25,6 +26,7 @@ async function startServer() {
   app.get("/api/ml/checkpoints", getMlCheckpoints);
   app.post("/api/ml/train", postMlTrain);
   app.post("/api/ml/predict", postMlPredict);
+  app.post("/api/ml/predict-all-grids", postMlPredictAllGrids);
   app.post("/api/ml/continuous-learn/ingest", postContinuousLearnIngest);
   app.get("/api/ml/continuous-learn/status", getContinuousLearnStatus);
 

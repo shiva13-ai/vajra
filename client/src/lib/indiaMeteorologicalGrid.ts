@@ -48,6 +48,14 @@ export type IndianGridSector = {
     primaryHazard: "Thunderstorm" | "Cloudburst" | "Hail" | "Lightning" | "Downburst" | "None";
     spatialAttentionScore: number;
   };
+  // Self-Learned XGBoost & LightGBM Checkpoint Inference (Nationwide All-Grid)
+  mlThunderstormProb?: number;
+  mlCloudburstProb?: number;
+  mlHailProb?: number;
+  mlMicroburstProb?: number;
+  mlProvenHazard?: boolean;
+  mlDominantThreat?: string;
+  mlEvaluatedAt?: string;
 };
 
 export type MicroGridCell = {

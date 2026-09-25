@@ -697,158 +697,7 @@ export default function Home() {
 
   return (
     <main ref={mapStageRef} className={`dashboard-shell ${isFullscreen ? "is-fullscreen" : ""}`}>
-      {mapEngine === "google" ? (
-        <div style={{ position: "absolute", inset: 0, zIndex: 0 }}>
-          <GoogleMapView 
-            center={focusedLocation || { lat: activeTarget.lat, lng: activeTarget.lon }} 
-            zoom={focusedLocation ? 12 : districtFilter !== "ALL DISTRICTS" ? 9 : 5}
-            mapLayer={mapLayer}
-            gridResolutionKm={gridResolutionKm}
-            liveSectors={liveGrid.sectors}
-            selectedSector={selectedSector}
-            selectedMicroCell={selectedMicroCell}
-            selectedDotCoords={{ lat: activeTarget.lat, lon: activeTarget.lon }}
-            onSelectSector={(sector) => {
-              setSelectedSector(sector);
-              setSelectedMicroCell(null);
-              setSelectedGridDot({ lat: sector.lat, lon: sector.lon, data: null });
-              setShowInspector(true);
-              toast.info(`Sector Focused: ${sector.name.toUpperCase()}`, {
-                description: `${sector.statusLabel} · ${sector.reflectivityDbz} dBZ · ${sector.state}`,
-              });
-            }}
-            onSelectMicroCell={(cell) => {
-              setSelectedMicroCell(cell);
-              setSelectedGridDot({ lat: cell.lat, lon: cell.lon, data: null });
-              setShowInspector(true);
-              toast.info(`${cell.parentName} (${cell.resolutionKm}km Cell)`, {
-                description: `${cell.statusLabel} · ${cell.reflectivityDbz} dBZ · Elev ${cell.elevationMeters}M`,
-              });
-            }}
-            onSelectDot={(data, lat, lon) => {
-              setSelectedGridDot({ lat, lon, data });
-            }}
-            onSelectCell={(cell) => {
-              const matched = frame.cells.find((c) => c.id === cell.id);
-              if (matched) setSelectedCell(matched);
-              setShowInspector(true);
-              setTrainingStudioOpen(true);
-              toast.info(`Event #${cell.id} Selected`, {
-                description: "ML Training & Parameter Studio opened for live tuning.",
-              });
-            }}
-            airports={Object.values(liveMetarAirports)}
-            leadMinutes={lead}
-            stormCells={frame.cells.map((c) => ({
-              id: c.id,
-              x: c.x,
-              y: c.y,
-              size: c.size,
-              intensity: c.intensity,
-              driftVx: c.driftX,
-              driftVy: c.driftY,
-              reflectivityDbz: c.reflectivityDbz,
-              temperatureC: c.temperatureC,
-              relativeHumidity: c.relativeHumidity,
-              dewPointC: c.dewPointC,
-              lclCloudBaseMeters: c.lclCloudBaseMeters,
-              lightningRatePerMin: c.lightningRatePerMin,
-              lightningProbability: c.lightningProbability,
-              cloudCoveragePercent: c.cloudCoveragePercent,
-            }))}
-            showStormTrails={showStormTrails}
-            atmosphericCond={liveAtmosphericCond}
-            focusedLatLon={focusedLocation ? { lat: focusedLocation.lat, lon: focusedLocation.lon } : { lat: activeTarget.lat, lon: activeTarget.lon }}
-            hazards={hazards}
-            showAttentionMap={hazards.thunderstorm}
-            onFallbackToTactical={() => setMapEngine("leaflet")}
-            onOpen3DView={handleOpen3DView}
-          />
-        </div>
-      ) : mapEngine === "leaflet" ? (
-        <div style={{ position: "absolute", inset: 0, zIndex: 0 }}>
-          <InteractiveMap
-            center={focusedLocation || { lat: activeTarget.lat, lng: activeTarget.lon }}
-            zoom={focusedLocation ? 12 : districtFilter !== "ALL DISTRICTS" ? 9 : 5}
-            mapLayer={mapLayer}
-            showRadar={showRadar}
-            showSatelliteIR={showSatelliteIR}
-            radarFrames={rv.radarFrames}
-            satelliteFrames={rv.satelliteFrames}
-            radarHost={rv.host}
-            currentRadarFrameIndex={rv.currentRadarIndex}
-            currentSatFrameIndex={rv.currentSatIndex}
-            gridResolutionKm={gridResolutionKm}
-            liveSectors={liveGrid.sectors}
-            selectedSector={selectedSector}
-            selectedMicroCell={selectedMicroCell}
-            selectedDotCoords={{ lat: activeTarget.lat, lon: activeTarget.lon }}
-            onSelectSector={(sector) => {
-              setSelectedSector(sector);
-              setSelectedMicroCell(null);
-              setSelectedGridDot({ lat: sector.lat, lon: sector.lon, data: null });
-              setShowInspector(true);
-              toast.info(`Sector Focused: ${sector.name.toUpperCase()}`, {
-                description: `${sector.statusLabel} · ${sector.reflectivityDbz} dBZ · ${sector.state}`,
-              });
-            }}
-            onSelectMicroCell={(cell) => {
-              setSelectedMicroCell(cell);
-              setSelectedGridDot({ lat: cell.lat, lon: cell.lon, data: null });
-              setShowInspector(true);
-              toast.info(`${cell.parentName} (${cell.resolutionKm}km Cell)`, {
-                description: `${cell.statusLabel} · ${cell.reflectivityDbz} dBZ · Elev ${cell.elevationMeters}M`,
-              });
-            }}
-            onSelectDot={(data, lat, lon) => {
-              setSelectedGridDot({ lat, lon, data });
-            }}
-            airports={Object.values(liveMetarAirports)}
-            leadMinutes={lead}
-            stormCells={frame.cells.map((c) => ({
-              id: c.id,
-              x: c.x,
-              y: c.y,
-              size: c.size,
-              intensity: c.intensity,
-              driftVx: c.driftX,
-              driftVy: c.driftY,
-              reflectivityDbz: c.reflectivityDbz,
-              temperatureC: c.temperatureC,
-              relativeHumidity: c.relativeHumidity,
-              dewPointC: c.dewPointC,
-              lclCloudBaseMeters: c.lclCloudBaseMeters,
-              lightningRatePerMin: c.lightningRatePerMin,
-              lightningProbability: c.lightningProbability,
-              cloudCoveragePercent: c.cloudCoveragePercent,
-            }))}
-            atmosphericCond={liveAtmosphericCond}
-            hazards={hazards}
-            showAttentionMap={hazards.thunderstorm}
-            showStormTrails={showStormTrails}
-            focusedLatLon={focusedLocation ? { lat: focusedLocation.lat, lon: focusedLocation.lon } : { lat: activeTarget.lat, lon: activeTarget.lon }}
-            onOpen3DView={handleOpen3DView}
-          />
-        </div>
-      ) : (
-        <IndiaMap className={`map-underlay map-layer-${mapLayer}`} mapLayer={mapLayer} showStates={showStates || mapLayer === "admin"} showDistricts={showDistricts || mapLayer === "admin"} stateFilter={stateFilter} districtFilter={districtFilter} radarUrl={mapLayer === "radar" && showRadar && radar.status === "live" ? radar.url : undefined} radarFrames={mapLayer === "radar" && showRadar && radar.status === "live" ? radar.frames : []} radarPlaying={radarPlaying} radarFrameIndex={radarFrameIndex} gridResolutionKm={gridResolutionKm} weatherPoints={weather.points} onRadarError={() => setRadar((current) => ({ ...current, status: "error", message: "Radar image unavailable · radar hidden" }))} />
-      )}
-      <div className="map-atmosphere" style={{ pointerEvents: "none" }} />
-      {mapEngine === "svg" && <div className="map-grid" style={{ pointerEvents: "none" }} />}
-      <div className="map-vignette" style={{ pointerEvents: "none" }} />
-      <div className="map-label label-ne">INDIA / NATIONAL WEATHER MOSAIC</div>
-      <div className="map-label label-sw">06°30′N — 37°30′N <span>•</span> 2° GRID RESOLUTION</div>
-      {mapEngine === "svg" && (
-        <>
-          <div className="reticle" style={{ left: `${activeCell.x}%`, top: `${activeCell.y}%` }}><span>{activeCell.id}_88 / LOCK</span></div>
-          <div className="reticle reticle-secondary" style={{ left: `${frame.cells[1].x}%`, top: `${frame.cells[1].y}%` }}><span>18_62</span></div>
-        </>
-      )}
-      {mapEngine === "svg" && visibleCells.map((cell) => <div key={cell.id} className={`storm-cell cell-${cell.id} ${selectedCell?.id === cell.id ? "selected-cell" : ""}`} role="button" tabIndex={0} aria-pressed={selectedCell?.id === cell.id} aria-label={`Inspect grid cell ${cell.id} in ${districtFilter}`} style={{ left: `${cell.x}%`, top: `${cell.y}%`, width: `${cell.size}%`, height: `${cell.size * .72}%`, opacity: hazards.thunderstorm ? cell.intensity : 0 }} onMouseEnter={() => setHoveredCell(cell)} onMouseLeave={() => setHoveredCell(null)} onFocus={() => setHoveredCell(cell)} onBlur={() => setHoveredCell(null)} onClick={() => { setSelectedCell(cell); setSelectedGridDot(null); setShowInspector(true); }} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); setSelectedCell(cell); setSelectedGridDot(null); setShowInspector(true); } }}><div className="cell-core" style={{ opacity: hazards.cloudburst ? cell.intensity : 0 }} /><div className="cell-halo" style={{ opacity: hazards.hail ? cell.intensity : 0 }} /></div>)}
-      {mapEngine === "svg" && hoveredCell && hoveredTelemetry && <div className="cell-tooltip" style={{ left: `${hoveredCell.x}%`, top: `${hoveredCell.y}%` }}><div className="tooltip-kicker"><span><span className="tooltip-live" /> CELL HOVER / LIVE FRAME</span><b>{formatLead(lead)}</b></div><div className="tooltip-title"><strong>GRID #{hoveredCell.id}_88</strong><span>17.{String(385 + hoveredCell.id).slice(-3)}°N · 78.486°E</span></div><div className="tooltip-metrics"><span>REFLECTIVITY <b>{hoveredTelemetry.reflectivity}<i>dBZ</i></b></span><span>RAIN RATE <b>{hoveredTelemetry.rainRate}<i>mm/hr</i></b></span><span>HAIL PROB. <b>{hoveredTelemetry.hail}<i>%</i></b></span><span>WIND GUST <b>{hoveredTelemetry.wind}<i>km/h</i></b></span><span>LIGHTNING <b>{hoveredTelemetry.lightning}<i>/km²/10m</i></b></span></div><div className="tooltip-footer"><span>1.5 KM × 1.5 KM</span><span>SPATIAL ATTENTION {Math.round(hoveredCell.intensity * 100)}%</span></div></div>}
-      {hazards.lightning && <div className="lightning-trace trace-a"><Zap size={18} /></div>}
-      {hazards.lightning && <div className="lightning-trace trace-b"><Zap size={13} /></div>}
-
+      {/* ── 1. HEADER TOPBAR ── */}
       <header className="topbar">
         <AppLogo />
         <button
@@ -967,673 +816,1000 @@ export default function Home() {
         </div>
       </header>
 
-      {/* ── UNIFIED TOP FLOATING COMMAND BAR (SEARCH + 3D DIGITAL TWIN) ── */}
-      <div
-        className="top-floating-command-bar"
-        style={{
-          position: "absolute",
-          top: "84px",
-          left: "50%",
-          transform: "translateX(-50%)",
-          zIndex: 25,
-          display: "flex",
-          alignItems: "center",
-          gap: "12px",
-        }}
-      >
-        {/* City / Sector Search Box */}
-        <div className="map-search" role="search" style={{ position: "relative", top: 0, left: 0, transform: "none", width: "290px", margin: 0 }}>
-          <div className="search-input-wrap">
-            <Search size={15} />
-            <input
-              aria-label="Search city or region"
-              value={search}
-              placeholder="LOCATE CITY / REGION"
-              onFocus={() => setSearchOpen(true)}
-              onChange={(event) => { setSearch(event.target.value); setSearchOpen(true); }}
-              onKeyDown={(event) => { if (event.key === "Enter") submitSearch(); if (event.key === "Escape") setSearchOpen(false); }}
-            />
-            <kbd>⌘ K</kbd>
-          </div>
-          {searchOpen && (
-            <div className="search-results">
-              {searchResults.length ? searchResults.map((location) => (
-                <button key={location.name} onMouseDown={(event) => event.preventDefault()} onClick={() => focusLocation(location)}>
-                  <span className="result-pin"><MapPin size={13} /></span>
-                  <span><strong>{location.name}</strong><small>{location.region}</small></span>
-                  <em>{location.lat.toFixed(2)}°N</em>
-                </button>
-              )) : <div className="no-results">NO MAPPED SECTOR MATCHES</div>}
-              <div className="search-hint">ENTER TO FOCUS <span>ESC TO CLOSE</span></div>
+      {/* ── 2. THREE-COLUMN OPERATING BODY ── */}
+      <div className="layout-body">
+        {/* ── LEFT SIDEBAR: CONTROLS, SEARCH, HAZARDS, ENGINE, FILTERS, LEGEND ── */}
+        <aside className="left-sidebar" aria-label="Controls and Layers">
+          {/* Quick Toolbar */}
+          <div className="sidebar-toolbar" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "6px" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+              <button
+                className="icon-button"
+                aria-label="Recenter on India"
+                onClick={() => { setLead(30); setFocusedLocation(null); toast.info("India view recentered", { description: "National grid locked to the India operating area." }); }}
+                title="Recenter National India Grid"
+                style={{ width: "30px", height: "30px" }}
+              >
+                <Crosshair size={14} />
+              </button>
+              <button
+                className="icon-button"
+                aria-label={isFullscreen ? "Exit fullscreen" : "Open fullscreen map"}
+                onClick={toggleFullscreen}
+                title={isFullscreen ? "Exit fullscreen" : "Fullscreen map"}
+                style={{ width: "30px", height: "30px" }}
+              >
+                {isFullscreen ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
+              </button>
+              <button
+                className="icon-button"
+                aria-label="Toggle Hazard Layers"
+                onClick={() => setShowLayers((v) => !v)}
+                title="Toggle Hazard Layers"
+                style={{ width: "30px", height: "30px", color: showLayers ? "#38BDF8" : "#8198AA" }}
+              >
+                <Layers3 size={14} />
+              </button>
             </div>
-          )}
-        </div>
-
-        {/* ⚡ High-Visibility Glowing 3D DIGITAL TWIN & STREET VIEW Command Button */}
-        <button
-          onClick={() => handleOpen3DView(selectedSector)}
-          style={{
-            height: "38px",
-            display: "flex",
-            alignItems: "center",
-            gap: "9px",
-            padding: "0 18px",
-            background: "linear-gradient(135deg, #00F2FE 0%, #0284C7 100%)",
-            border: "2px solid #FFFFFF",
-            borderRadius: "6px",
-            color: "#030A14",
-            fontFamily: "'IBM Plex Mono', monospace",
-            fontSize: "11px",
-            fontWeight: 800,
-            letterSpacing: "0.06em",
-            cursor: "pointer",
-            boxShadow: "0 0 26px rgba(0, 242, 254, 0.85), 0 4px 16px rgba(0,0,0,0.6)",
-            whiteSpace: "nowrap",
-            textTransform: "uppercase",
-            transition: "all 0.18s ease-in-out",
-          }}
-          title="Launch 360° Google Street View & 3D Satellite Coverage for active sector"
-        >
-          <Box size={16} style={{ color: "#030A14" }} />
-          <span>⚡ 3D STREET VIEW & AREA PERSPECTIVE</span>
-        </button>
-      </div>
-
-      <div className="map-toolbar">
-        <button
-          className="icon-button"
-          aria-label="3D Digital Twin"
-          title="Launch 3D Space View, Volumetric Digital Twin & Street View"
-          onClick={() => handleOpen3DView(selectedSector)}
-          style={{
-            border: "2px solid #00F2FE",
-            background: "linear-gradient(135deg, #00F2FE 0%, #0284C7 100%)",
-            color: "#030A14",
-            fontWeight: 800,
-            boxShadow: "0 0 20px rgba(0, 242, 254, 0.9)",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: "1px",
-            height: "44px",
-            width: "44px",
-          }}
-        >
-          <Box size={15} />
-          <span style={{ fontSize: "8px", fontWeight: 900, letterSpacing: "0.05em" }}>3D</span>
-        </button>
-        <button className="icon-button" aria-label="Layers" onClick={() => setShowLayers((value) => !value)}><Layers3 size={16} /></button><button className="icon-button" aria-label="Recenter on India" onClick={() => { setLead(30); setFocusedLocation(null); toast.info("India view recentered", { description: "National grid locked to the India operating area." }); }}><Crosshair size={16} /></button><button className="icon-button" aria-label={isFullscreen ? "Exit fullscreen" : "Open fullscreen map"} onClick={toggleFullscreen}>{isFullscreen ? <Minimize2 size={16} /> : <Maximize2 size={16} />}</button></div>
-      {focusedLocation && <div className="location-focus" style={{ left: `${focusedLocation.x}%`, top: `${focusedLocation.y}%` }}><span>{focusedLocation.name.toUpperCase()}</span></div>}
-      <div className="radar-dock" aria-label="Radar timeline controls"><div><span>RADAR TIMELINE</span><b>{radar.frames.length ? `${radarFrameIndex + 1}/${radar.frames.length}` : "--/--"}</b></div><button onClick={() => setRadarFrameIndex((current) => radar.frames.length ? (current - 1 + radar.frames.length) % radar.frames.length : 0)} aria-label="Previous radar frame"><ChevronLeft size={13} /></button><button className="radar-play" onClick={() => setRadarPlaying((value) => !value)} aria-label={radarPlaying ? "Pause radar animation" : "Play radar animation"}>{radarPlaying ? <Pause size={13} /> : <Play size={13} />}</button><button onClick={() => setRadarFrameIndex((current) => radar.frames.length ? (current + 1) % radar.frames.length : 0)} aria-label="Next radar frame"><ChevronRight size={13} /></button><span className="radar-dock-time">{radar.frames[radarFrameIndex]?.time ? formatDataTimestamp(radar.frames[radarFrameIndex].time) : "WAITING"}</span><label>GRID <select value={gridResolutionKm} onChange={(event) => setGridResolutionKm(Number(event.target.value) as 1 | 1.5 | 2 | 3)}><option value="1">1 KM</option><option value="1.5">1.5 KM</option><option value="2">2 KM</option><option value="3">3 KM</option></select></label></div>
-
-      {showLayers && <Panel className="layers-panel">
-        <div className="panel-kicker"><span>01 / OVERLAYS</span><button className="panel-collapse" onClick={() => setShowLayers(false)}><ChevronLeft size={14} /></button></div>
-        <div className="panel-title-row"><h2>Hazard layers</h2><SlidersHorizontal size={16} /></div>
-        <div className="layer-list">{(Object.keys(hazardMeta) as HazardKey[]).map((key) => { const item = hazardMeta[key]; const Icon = item.icon; return <button key={key} className={`layer-row ${hazards[key] ? "active" : ""}`} onClick={() => toggleHazard(key)}><span className="layer-icon" style={{ color: item.color, background: item.bg }}><Icon size={14} /></span><span className="layer-copy"><b>{item.label}</b><small>{key === "thunderstorm" ? "CAPE / REFLECTIVITY" : key === "cloudburst" ? ">100 MM / HR" : key === "hail" ? "PROBABILITY CORE" : key === "lightning" ? "STRIKE DENSITY" : "SHEAR VECTORS"}</small></span><span className={`switch ${hazards[key] ? "on" : ""}`}><i /></span></button> })}</div>
-        <div className="layer-divider"><span>MAP ENGINE</span><i /></div>
-        <div className="map-view-toggle" aria-label="Map engine toggle">
-          <span>ENGINE</span>
-          <button className={mapEngine === "google" ? "active" : ""} onClick={() => setMapEngine("google")}>GOOGLE MAPS</button>
-          <button className={mapEngine === "leaflet" ? "active" : ""} onClick={() => setMapEngine("leaflet")}>TACTICAL / LEAFLET</button>
-          <button
-            style={{
-              background: "linear-gradient(135deg, rgba(6, 182, 212, 0.35), rgba(14, 165, 233, 0.55))",
-              color: "#00F2FE",
-              fontWeight: 700,
-              border: "1px solid #00F2FE",
-              boxShadow: "0 0 10px rgba(0, 242, 254, 0.4)",
-              cursor: "pointer",
-            }}
-            onClick={() => handleOpen3DView(selectedSector)}
-            title="Launch 3D Volumetric Digital Twin & Street View"
-          >
-            ⚡ 3D DIGITAL TWIN
-          </button>
-          <button className={mapEngine === "svg" ? "active" : ""} onClick={() => setMapEngine("svg")}>LEGACY SVG</button>
-        </div>
-        <div className="layer-divider"><span>BASE MAP & SATELLITE</span><i /></div>
-        <div className="map-view-toggle" aria-label="Map layer view">
-          <span>VIEW</span>
-          {([['radar', 'CARTO DARK (FREE)'], ['satellite', 'ESRI SATELLITE (FREE)'], ['admin', 'STREETS / OSM (FREE)']] as const).map(([value, label]) => 
-            <button key={value} className={mapLayer === value ? "active" : ""} onClick={() => setMapLayer(value)}>{label}</button>
-          )}
-        </div>
-        <div className="layer-note" style={{ color: "#38BDF8", marginTop: "6px", marginBottom: "4px" }}>
-          <span>LIVE 1–3 KM CONVECTIVE MESH ACTIVE · PAN/ZOOM TO RESOLVE CELLS</span>
-        </div>
-        <div className="boundary-filters"><label>STATE FILTER<select value={stateFilter} onChange={(event) => { const nextState = event.target.value; setStateFilter(nextState); setDistrictFilter("ALL DISTRICTS"); }}><option>ALL STATES</option>{Object.keys(districtsByState).filter((name) => name !== "ALL STATES").map((name) => <option key={name}>{name}</option>)}</select></label><label>DISTRICT FILTER<select value={districtFilter} onChange={(event) => setDistrictFilter(event.target.value)}><option>ALL DISTRICTS</option>{districtOptions.map((name) => <option key={name}>{name}</option>)}</select></label></div><div className={`grid-scope-readout ${boundaryStatus === "error" ? "boundary-error" : ""}`}>{boundaryStatus === "loading" && <RefreshCw size={10} className="boundary-spinner" />}{boundaryStatus === "error" && <AlertTriangle size={10} />}{districtFilter === "ALL DISTRICTS" ? `ALL ${stateFilter} · NATIONAL GRID` : `${districtFilter.toUpperCase()} · ${gridResolutionKm} KM GRID CELLS · ${boundaryStatus === "loading" ? "BOUNDARY LOADING" : boundaryStatus === "error" ? "BOUNDARY ERROR" : selectedBoundary ? "OFFICIAL POLYGON CLIP" : "DISTRICT NOT FOUND"}`}</div>
-        <div className="layer-list map-layer-list">
-          <button className={`layer-row ${showStates ? "active" : ""}`} onClick={() => setShowStates((value) => !value)}><span className="layer-icon layer-icon-cyan"><Layers3 size={14} /></span><span className="layer-copy"><b>State boundaries</b><small>ADM 1 / REGIONAL FOCUS</small></span><span className={`switch ${showStates ? "on" : ""}`}><i /></span></button>
-          <button className={`layer-row ${showDistricts ? "active" : ""}`} onClick={() => setShowDistricts((value) => !value)}><span className="layer-icon layer-icon-cyan"><MapPin size={14} /></span><span className="layer-copy"><b>District boundaries</b><small>ADM 2 / FINE GRID CONTEXT</small></span><span className={`switch ${showDistricts ? "on" : ""}`}><i /></span></button>
-          <button className={`layer-row ${showRadar ? "active" : ""}`} onClick={() => setShowRadar((value) => !value)}><span className="layer-icon layer-icon-radar"><ScanLine size={14} /></span><span className="layer-copy"><b>Live radar field</b><small>{radar.status === "live" ? "RAINVIEWER / 10 MIN FRAME" : radar.message.toUpperCase()}</small></span><span className={`switch ${showRadar ? "on" : ""}`}><i /></span></button>
-        </div>
-        <div className="layer-note">BOUNDARIES: DATAMEET CC BY 2.5 IN · RADAR: RAINVIEWER</div>
-
-        <div style={{
-          marginTop: "10px",
-          marginBottom: "10px",
-          padding: "10px",
-          background: "rgba(14, 36, 58, 0.6)",
-          border: "1px solid rgba(56, 189, 248, 0.25)",
-          borderRadius: "6px",
-        }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
-            <span style={{ fontSize: "10px", fontWeight: 700, color: "#38BDF8", fontFamily: "'IBM Plex Mono', monospace", letterSpacing: "0.5px" }}>
-              LIVE FEEDS & ML AUDIT
-            </span>
-            <span style={{ fontSize: "9px", color: "#22C55E", fontWeight: 700, background: "rgba(34, 197, 94, 0.15)", padding: "1px 5px", borderRadius: "3px" }}>
-              4 LIVE
-            </span>
-          </div>
-          <p style={{ fontSize: "9px", color: "#94A3B8", margin: "0 0 8px 0", lineHeight: "1.4" }}>
-            Open-Meteo, RainViewer radar, NOAA METAR & Google Maps are active.
-          </p>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6px" }}>
             <button
-              onClick={() => { setSystemHubTab("data"); setSystemHubOpen(true); }}
+              onClick={() => handleOpen3DView(selectedSector)}
               style={{
-                background: "rgba(56, 189, 248, 0.12)",
-                border: "1px solid rgba(56, 189, 248, 0.4)",
+                height: "30px",
+                display: "flex",
+                alignItems: "center",
+                gap: "6px",
+                padding: "0 10px",
+                background: "linear-gradient(135deg, #00F2FE 0%, #0284C7 100%)",
+                border: "1px solid #FFFFFF",
                 borderRadius: "4px",
-                padding: "6px 4px",
-                color: "#38BDF8",
-                fontSize: "9px",
+                color: "#030A14",
                 fontFamily: "'IBM Plex Mono', monospace",
-                fontWeight: 600,
+                fontSize: "10px",
+                fontWeight: 800,
                 cursor: "pointer",
-                textAlign: "center",
+                boxShadow: "0 0 14px rgba(0, 242, 254, 0.7)",
+                whiteSpace: "nowrap",
               }}
+              title="Launch 360° Google Street View & 3D Satellite perspective"
             >
-              API KEYS & FEEDS
-            </button>
-            <button
-              onClick={() => { setSystemHubTab("ml"); setSystemHubOpen(true); }}
-              style={{
-                background: "rgba(168, 85, 247, 0.12)",
-                border: "1px solid rgba(168, 85, 247, 0.4)",
-                borderRadius: "4px",
-                padding: "6px 4px",
-                color: "#C084FC",
-                fontSize: "9px",
-                fontFamily: "'IBM Plex Mono', monospace",
-                fontWeight: 600,
-                cursor: "pointer",
-                textAlign: "center",
-              }}
-            >
-              ML ARCHITECTURE
+              <Box size={13} style={{ color: "#030A14" }} />
+              <span>3D TWIN</span>
             </button>
           </div>
-        </div>
 
-        <div className="legend"><div className="legend-title"><span>REFLECTIVITY / DBZ</span><span>10 — 65</span></div><div className="legend-bar" /><div className="legend-scale"><span>10</span><span>25</span><span>42</span><span>50</span><span>65</span></div></div>
-      </Panel>}
-
-      <aside className="alert-stack">
-        <div className="panel-kicker"><span>02 / PRIORITY TARGETS</span><span className="target-count"><Target size={12} /> 02</span></div>
-        <Panel className={`alert-card ${activeTarget.severity === "severe" ? "critical" : "warning"}`}>
-          <div className="alert-card-top">
-            <span className={`alert-badge ${activeTarget.severity === "severe" ? "red" : activeTarget.severity === "high" ? "orange" : "cyan"}`}>
-              <span /> {activeTarget.statusLabel.toUpperCase()}
-            </span>
-            <span className="alert-id">TGT-{activeTarget.id.slice(0, 7).toUpperCase()}</span>
-          </div>
-          <h3>{activeTarget.name}</h3>
-          <div className="alert-location">
-            {activeTarget.state} <span>·</span> {activeTarget.lat.toFixed(3)}°N, {activeTarget.lon.toFixed(3)}°E <span>·</span> {activeTarget.elevation}M MSL
-          </div>
-          <div className="alert-hazard">
-            <ScanLine size={15} />
-            <span>RADAR {activeTarget.reflectivity} dBZ</span>
-            <span className="slash">/</span>
-            <CloudRain size={14} />
-            <span>{activeTarget.rainRate} mm/hr</span>
-            <span className="slash">/</span>
-            <Wind size={14} />
-            <span>{activeTarget.windGust} km/h</span>
-          </div>
-          <div className="eta-line">
-            <span>NOWCAST (+30M)</span>
-            <strong style={{ fontSize: "10px", fontFamily: "'IBM Plex Mono', monospace" }}>
-              {activeTarget.predictions ? `${activeTarget.predictions.t30.reflectivityDbz} dBZ (${activeTarget.predictions.t30.trend.toUpperCase()})` : "TRACKING STABLE"}
-            </strong>
-          </div>
-          <div className="trajectory">
-            <ArrowUpRight size={14} />
-            <span>{activeTarget.predictions?.summary ? activeTarget.predictions.summary.slice(0, 36) + "..." : "CONVGRU ATTENTION ACTIVE"}</span>
-            <b>{activeTarget.severity.toUpperCase()}</b>
-          </div>
-          <button
-            onClick={() => handleOpen3DView(selectedSector)}
-            style={{
-              width: "100%",
-              marginTop: "10px",
-              padding: "7px 10px",
-              background: "linear-gradient(135deg, rgba(6, 182, 212, 0.28) 0%, rgba(14, 165, 233, 0.48) 100%)",
-              border: "1.5px solid #00F2FE",
-              borderRadius: "4px",
-              color: "#FFFFFF",
-              fontFamily: "'IBM Plex Mono', monospace",
-              fontSize: "10px",
-              fontWeight: 700,
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: "6px",
-              boxShadow: "0 0 14px rgba(0, 242, 254, 0.4)",
-              letterSpacing: "0.04em",
-            }}
-          >
-            <Box size={13} style={{ color: "#00F2FE" }} />
-            <span>⚡ 3D STREET VIEW & AREA PERSPECTIVE</span>
-          </button>
-        </Panel>
-        {(() => {
-          const airportList = Object.values(liveMetarAirports);
-          const nearestMetar = airportList.length > 0
-            ? airportList.reduce((closest, curr) => {
-                const distCurr = Math.hypot(curr.lat - activeTarget.lat, curr.lon - activeTarget.lon);
-                const distClosest = Math.hypot(closest.lat - activeTarget.lat, closest.lon - activeTarget.lon);
-                return distCurr < distClosest ? curr : closest;
-              }, airportList[0])
-            : null;
-
-          return nearestMetar ? (
-            <Panel className={`alert-card ${nearestMetar.isShearAlert ? "critical" : "warning"}`}>
-              <div className="alert-card-top">
-                <span className={`alert-badge ${nearestMetar.isShearAlert ? "red" : "orange"}`}>
-                  <span /> {nearestMetar.isShearAlert ? "SQUALL / SHEAR ALERT" : "REGIONAL METAR"}
-                </span>
-                <span className="alert-id">{nearestMetar.icaoId}</span>
+          {/* City / Sector Search Box */}
+          <div className="sidebar-search" role="search">
+            <div className="search-input-wrap" style={{ height: "34px", width: "100%" }}>
+              <Search size={14} />
+              <input
+                aria-label="Search city or region"
+                value={search}
+                placeholder="LOCATE CITY / REGION"
+                onFocus={() => setSearchOpen(true)}
+                onChange={(event) => { setSearch(event.target.value); setSearchOpen(true); }}
+                onKeyDown={(event) => { if (event.key === "Enter") submitSearch(); if (event.key === "Escape") setSearchOpen(false); }}
+              />
+              <kbd>⌘ K</kbd>
+            </div>
+            {searchOpen && (
+              <div className="search-results">
+                {searchResults.length ? searchResults.map((location) => (
+                  <button key={location.name} onMouseDown={(event) => event.preventDefault()} onClick={() => { focusLocation(location); setSearchOpen(false); }}>
+                    <span className="result-pin"><MapPin size={13} /></span>
+                    <span><strong>{location.name}</strong><small>{location.region}</small></span>
+                    <em>{location.lat.toFixed(2)}°N</em>
+                  </button>
+                )) : <div className="no-results">NO MAPPED SECTOR MATCHES</div>}
+                <div className="search-hint">ENTER TO FOCUS <span>ESC TO CLOSE</span></div>
               </div>
-              <h3>{nearestMetar.name ? nearestMetar.name.split(",")[0] : "Regional Airport"}</h3>
+            )}
+          </div>
+
+          {/* 01 / OVERLAYS: Hazard Layers */}
+          <section className="sidebar-card">
+            <div className="panel-kicker">
+              <span>01 / OVERLAYS</span>
+              <button className="panel-collapse" onClick={() => setShowLayers((v) => !v)} style={{ cursor: "pointer" }}>
+                {showLayers ? "−" : "+"}
+              </button>
+            </div>
+            <div className="panel-title-row" style={{ margin: "8px 0 10px" }}>
+              <h2 style={{ fontSize: "13px" }}>Hazard layers</h2>
+              <SlidersHorizontal size={14} style={{ color: "#38bdf8" }} />
+            </div>
+            {showLayers && (
+              <div className="layer-list">
+                {(Object.keys(hazardMeta) as HazardKey[]).map((key) => {
+                  const item = hazardMeta[key];
+                  const Icon = item.icon;
+                  return (
+                    <button key={key} className={`layer-row ${hazards[key] ? "active" : ""}`} onClick={() => toggleHazard(key)}>
+                      <span className="layer-icon" style={{ color: item.color, background: item.bg }}>
+                        <Icon size={14} />
+                      </span>
+                      <span className="layer-copy">
+                        <b>{item.label}</b>
+                        <small>{key === "thunderstorm" ? "CAPE / REFLECTIVITY" : key === "cloudburst" ? ">100 MM / HR" : key === "hail" ? "PROBABILITY CORE" : key === "lightning" ? "STRIKE DENSITY" : "SHEAR VECTORS"}</small>
+                      </span>
+                      <span className={`switch ${hazards[key] ? "on" : ""}`}><i /></span>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </section>
+
+          {/* MAP ENGINE CONFIGURATION */}
+          <section className="sidebar-card">
+            <div className="panel-kicker"><span>MAP CONFIG</span></div>
+            <div className="layer-divider" style={{ marginTop: "6px" }}><span>MAP ENGINE</span><i /></div>
+            <div className="map-view-toggle" aria-label="Map engine toggle" style={{ flexWrap: "wrap", gap: "4px" }}>
+              <button className={mapEngine === "google" ? "active" : ""} onClick={() => setMapEngine("google")}>GOOGLE MAPS</button>
+              <button className={mapEngine === "leaflet" ? "active" : ""} onClick={() => setMapEngine("leaflet")}>TACTICAL / LEAFLET</button>
+              <button
+                style={{
+                  background: "linear-gradient(135deg, rgba(6, 182, 212, 0.35), rgba(14, 165, 233, 0.55))",
+                  color: "#00F2FE",
+                  fontWeight: 700,
+                  border: "1px solid #00F2FE",
+                  boxShadow: "0 0 10px rgba(0, 242, 254, 0.4)",
+                  cursor: "pointer",
+                }}
+                onClick={() => handleOpen3DView(selectedSector)}
+                title="Launch 3D Volumetric Digital Twin & Street View"
+              >
+                ⚡ 3D TWIN
+              </button>
+              <button className={mapEngine === "svg" ? "active" : ""} onClick={() => setMapEngine("svg")}>LEGACY SVG</button>
+            </div>
+
+            <div className="layer-divider"><span>BASE MAP & SATELLITE</span><i /></div>
+            <div className="map-view-toggle" aria-label="Map layer view" style={{ flexWrap: "wrap", gap: "4px" }}>
+              {([['radar', 'CARTO DARK'], ['satellite', 'ESRI SATELLITE'], ['admin', 'STREETS / OSM']] as const).map(([value, label]) => 
+                <button key={value} className={mapLayer === value ? "active" : ""} onClick={() => setMapLayer(value)}>{label}</button>
+              )}
+            </div>
+            <div className="layer-note" style={{ color: "#38BDF8", marginTop: "6px" }}>
+              <span>LIVE 1–3 KM CONVECTIVE MESH ACTIVE</span>
+            </div>
+          </section>
+
+          {/* SPATIAL SCOPE & BOUNDARY FILTERS */}
+          <section className="sidebar-card">
+            <div className="panel-kicker"><span>SPATIAL SCOPE</span></div>
+            <div className="boundary-filters" style={{ display: "grid", gap: "6px", marginTop: "6px" }}>
+              <label style={{ display: "block", fontSize: "8px", color: "#6b8799", fontFamily: "'IBM Plex Mono', monospace" }}>
+                STATE FILTER
+                <select
+                  style={{ width: "100%", marginTop: "3px", padding: "4px 6px", background: "#0b1c2a", border: "1px solid rgba(56,189,248,0.28)", color: "#d8f2ff", fontSize: "9px", fontFamily: "'IBM Plex Mono', monospace" }}
+                  value={stateFilter}
+                  onChange={(event) => { const nextState = event.target.value; setStateFilter(nextState); setDistrictFilter("ALL DISTRICTS"); }}
+                >
+                  <option>ALL STATES</option>
+                  {Object.keys(districtsByState).filter((name) => name !== "ALL STATES").map((name) => <option key={name}>{name}</option>)}
+                </select>
+              </label>
+              <label style={{ display: "block", fontSize: "8px", color: "#6b8799", fontFamily: "'IBM Plex Mono', monospace" }}>
+                DISTRICT FILTER
+                <select
+                  style={{ width: "100%", marginTop: "3px", padding: "4px 6px", background: "#0b1c2a", border: "1px solid rgba(56,189,248,0.28)", color: "#d8f2ff", fontSize: "9px", fontFamily: "'IBM Plex Mono', monospace" }}
+                  value={districtFilter}
+                  onChange={(event) => setDistrictFilter(event.target.value)}
+                >
+                  <option>ALL DISTRICTS</option>
+                  {districtOptions.map((name) => <option key={name}>{name}</option>)}
+                </select>
+              </label>
+            </div>
+            <div className={`grid-scope-readout ${boundaryStatus === "error" ? "boundary-error" : ""}`} style={{ marginTop: "6px" }}>
+              {boundaryStatus === "loading" && <RefreshCw size={10} className="boundary-spinner" />}
+              {boundaryStatus === "error" && <AlertTriangle size={10} />}
+              {districtFilter === "ALL DISTRICTS" ? `ALL ${stateFilter} · NATIONAL GRID` : `${districtFilter.toUpperCase()} · ${gridResolutionKm} KM GRID CELLS`}
+            </div>
+            <div className="layer-list map-layer-list" style={{ marginTop: "6px" }}>
+              <button className={`layer-row ${showStates ? "active" : ""}`} onClick={() => setShowStates((value) => !value)}>
+                <span className="layer-icon layer-icon-cyan"><Layers3 size={14} /></span>
+                <span className="layer-copy"><b>State boundaries</b><small>ADM 1 / REGIONAL FOCUS</small></span>
+                <span className={`switch ${showStates ? "on" : ""}`}><i /></span>
+              </button>
+              <button className={`layer-row ${showDistricts ? "active" : ""}`} onClick={() => setShowDistricts((value) => !value)}>
+                <span className="layer-icon layer-icon-cyan"><MapPin size={14} /></span>
+                <span className="layer-copy"><b>District boundaries</b><small>ADM 2 / FINE GRID CONTEXT</small></span>
+                <span className={`switch ${showDistricts ? "on" : ""}`}><i /></span>
+              </button>
+              <button className={`layer-row ${showRadar ? "active" : ""}`} onClick={() => setShowRadar((value) => !value)}>
+                <span className="layer-icon layer-icon-radar"><ScanLine size={14} /></span>
+                <span className="layer-copy"><b>Live radar field</b><small>{radar.status === "live" ? "RAINVIEWER / 10 MIN FRAME" : radar.message.toUpperCase()}</small></span>
+                <span className={`switch ${showRadar ? "on" : ""}`}><i /></span>
+              </button>
+            </div>
+          </section>
+
+          {/* LIVE FEEDS & ML AUDIT SHORTCUT */}
+          <section className="sidebar-card">
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
+              <span style={{ fontSize: "10px", fontWeight: 700, color: "#38BDF8", fontFamily: "'IBM Plex Mono', monospace", letterSpacing: "0.5px" }}>
+                LIVE FEEDS & ML AUDIT
+              </span>
+              <span style={{ fontSize: "9px", color: "#22C55E", fontWeight: 700, background: "rgba(34, 197, 94, 0.15)", padding: "1px 5px", borderRadius: "3px" }}>
+                4 LIVE
+              </span>
+            </div>
+            <p style={{ fontSize: "9px", color: "#94A3B8", margin: "0 0 8px 0", lineHeight: "1.4" }}>
+              Open-Meteo, RainViewer radar, NOAA METAR & Google Maps are active.
+            </p>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6px" }}>
+              <button
+                onClick={() => { setSystemHubTab("data"); setSystemHubOpen(true); }}
+                style={{
+                  background: "rgba(56, 189, 248, 0.12)",
+                  border: "1px solid rgba(56, 189, 248, 0.4)",
+                  borderRadius: "4px",
+                  padding: "6px 4px",
+                  color: "#38BDF8",
+                  fontSize: "9px",
+                  fontFamily: "'IBM Plex Mono', monospace",
+                  fontWeight: 600,
+                  cursor: "pointer",
+                  textAlign: "center",
+                }}
+              >
+                API KEYS & FEEDS
+              </button>
+              <button
+                onClick={() => { setSystemHubTab("ml"); setSystemHubOpen(true); }}
+                style={{
+                  background: "rgba(168, 85, 247, 0.12)",
+                  border: "1px solid rgba(168, 85, 247, 0.4)",
+                  borderRadius: "4px",
+                  padding: "6px 4px",
+                  color: "#C084FC",
+                  fontSize: "9px",
+                  fontFamily: "'IBM Plex Mono', monospace",
+                  fontWeight: 600,
+                  cursor: "pointer",
+                  textAlign: "center",
+                }}
+              >
+                ML ARCHITECTURE
+              </button>
+            </div>
+          </section>
+
+          {/* DBZ REFLECTIVITY LEGEND */}
+          <section className="sidebar-card">
+            <div className="legend" style={{ marginTop: 0, paddingTop: 0, borderTop: "none" }}>
+              <div className="legend-title"><span>REFLECTIVITY / DBZ</span><span>10 — 65</span></div>
+              <div className="legend-bar" />
+              <div className="legend-scale"><span>10</span><span>25</span><span>42</span><span>50</span><span>65</span></div>
+            </div>
+          </section>
+        </aside>
+
+        {/* ── CENTER COLUMN: INTERACTIVE MAP STAGE ── */}
+        <div className="map-stage" aria-label="Interactive Map Area">
+          {mapEngine === "google" ? (
+            <div style={{ position: "absolute", inset: 0, zIndex: 0 }}>
+              <GoogleMapView 
+                center={focusedLocation || { lat: activeTarget.lat, lng: activeTarget.lon }} 
+                zoom={focusedLocation ? 12 : districtFilter !== "ALL DISTRICTS" ? 9 : 5}
+                mapLayer={mapLayer}
+                gridResolutionKm={gridResolutionKm}
+                liveSectors={liveGrid.sectors}
+                selectedSector={selectedSector}
+                selectedMicroCell={selectedMicroCell}
+                selectedDotCoords={{ lat: activeTarget.lat, lon: activeTarget.lon }}
+                onSelectSector={(sector) => {
+                  setSelectedSector(sector);
+                  setSelectedMicroCell(null);
+                  setSelectedGridDot({ lat: sector.lat, lon: sector.lon, data: null });
+                  setShowInspector(true);
+                  toast.info(`Sector Focused: ${sector.name.toUpperCase()}`, {
+                    description: `${sector.statusLabel} · ${sector.reflectivityDbz} dBZ · ${sector.state}`,
+                  });
+                }}
+                onSelectMicroCell={(cell) => {
+                  setSelectedMicroCell(cell);
+                  setSelectedGridDot({ lat: cell.lat, lon: cell.lon, data: null });
+                  setShowInspector(true);
+                  toast.info(`${cell.parentName} (${cell.resolutionKm}km Cell)`, {
+                    description: `${cell.statusLabel} · ${cell.reflectivityDbz} dBZ · Elev ${cell.elevationMeters}M`,
+                  });
+                }}
+                onSelectDot={(data, lat, lon) => {
+                  setSelectedGridDot({ lat, lon, data });
+                }}
+                onSelectCell={(cell) => {
+                  const matched = frame.cells.find((c) => c.id === cell.id);
+                  if (matched) setSelectedCell(matched);
+                  setShowInspector(true);
+                  setTrainingStudioOpen(true);
+                  toast.info(`Event #${cell.id} Selected`, {
+                    description: "ML Training & Parameter Studio opened for live tuning.",
+                  });
+                }}
+                airports={Object.values(liveMetarAirports)}
+                leadMinutes={lead}
+                stormCells={frame.cells.map((c) => ({
+                  id: c.id,
+                  x: c.x,
+                  y: c.y,
+                  size: c.size,
+                  intensity: c.intensity,
+                  driftVx: c.driftX,
+                  driftVy: c.driftY,
+                  reflectivityDbz: c.reflectivityDbz,
+                  temperatureC: c.temperatureC,
+                  relativeHumidity: c.relativeHumidity,
+                  dewPointC: c.dewPointC,
+                  lclCloudBaseMeters: c.lclCloudBaseMeters,
+                  lightningRatePerMin: c.lightningRatePerMin,
+                  lightningProbability: c.lightningProbability,
+                  cloudCoveragePercent: c.cloudCoveragePercent,
+                }))}
+                showStormTrails={showStormTrails}
+                atmosphericCond={liveAtmosphericCond}
+                focusedLatLon={focusedLocation ? { lat: focusedLocation.lat, lon: focusedLocation.lon } : { lat: activeTarget.lat, lon: activeTarget.lon }}
+                hazards={hazards}
+                showAttentionMap={hazards.thunderstorm}
+                onFallbackToTactical={() => setMapEngine("leaflet")}
+                onOpen3DView={handleOpen3DView}
+              />
+            </div>
+          ) : mapEngine === "leaflet" ? (
+            <div style={{ position: "absolute", inset: 0, zIndex: 0 }}>
+              <InteractiveMap
+                center={focusedLocation || { lat: activeTarget.lat, lng: activeTarget.lon }}
+                zoom={focusedLocation ? 12 : districtFilter !== "ALL DISTRICTS" ? 9 : 5}
+                mapLayer={mapLayer}
+                gridResolutionKm={gridResolutionKm}
+                liveSectors={liveGrid.sectors}
+                selectedSector={selectedSector}
+                selectedMicroCell={selectedMicroCell}
+                selectedDotCoords={{ lat: activeTarget.lat, lon: activeTarget.lon }}
+                onSelectSector={(sector) => {
+                  setSelectedSector(sector);
+                  setSelectedMicroCell(null);
+                  setSelectedGridDot({ lat: sector.lat, lon: sector.lon, data: null });
+                  setShowInspector(true);
+                  toast.info(`Sector Focused: ${sector.name.toUpperCase()}`, {
+                    description: `${sector.statusLabel} · ${sector.reflectivityDbz} dBZ · ${sector.state}`,
+                  });
+                }}
+                onSelectMicroCell={(cell) => {
+                  setSelectedMicroCell(cell);
+                  setSelectedGridDot({ lat: cell.lat, lon: cell.lon, data: null });
+                  setShowInspector(true);
+                  toast.info(`${cell.parentName} (${cell.resolutionKm}km Cell)`, {
+                    description: `${cell.statusLabel} · ${cell.reflectivityDbz} dBZ · Elev ${cell.elevationMeters}M`,
+                  });
+                }}
+                onSelectDot={(data, lat, lon) => {
+                  setSelectedGridDot({ lat, lon, data });
+                }}
+                onSelectCell={(cell) => {
+                  const matched = frame.cells.find((c) => c.id === cell.id);
+                  if (matched) setSelectedCell(matched);
+                  setShowInspector(true);
+                  setTrainingStudioOpen(true);
+                  toast.info(`Event #${cell.id} Selected`, {
+                    description: "ML Training & Parameter Studio opened for live tuning.",
+                  });
+                }}
+                airports={Object.values(liveMetarAirports)}
+                leadMinutes={lead}
+                stormCells={frame.cells.map((c) => ({
+                  id: c.id,
+                  x: c.x,
+                  y: c.y,
+                  size: c.size,
+                  intensity: c.intensity,
+                  driftVx: c.driftX,
+                  driftVy: c.driftY,
+                  reflectivityDbz: c.reflectivityDbz,
+                  temperatureC: c.temperatureC,
+                  relativeHumidity: c.relativeHumidity,
+                  dewPointC: c.dewPointC,
+                  lclCloudBaseMeters: c.lclCloudBaseMeters,
+                  lightningRatePerMin: c.lightningRatePerMin,
+                  lightningProbability: c.lightningProbability,
+                  cloudCoveragePercent: c.cloudCoveragePercent,
+                }))}
+                showStormTrails={showStormTrails}
+                atmosphericCond={liveAtmosphericCond}
+                focusedLatLon={focusedLocation ? { lat: focusedLocation.lat, lon: focusedLocation.lon } : { lat: activeTarget.lat, lon: activeTarget.lon }}
+                hazards={hazards}
+                showAttentionMap={hazards.thunderstorm}
+                onOpen3DView={handleOpen3DView}
+              />
+            </div>
+          ) : (
+            <IndiaMap className={`map-underlay map-layer-${mapLayer}`} mapLayer={mapLayer} showStates={showStates || mapLayer === "admin"} showDistricts={showDistricts || mapLayer === "admin"} stateFilter={stateFilter} districtFilter={districtFilter} radarUrl={mapLayer === "radar" && showRadar && radar.status === "live" ? radar.url : undefined} radarFrames={mapLayer === "radar" && showRadar && radar.status === "live" ? radar.frames : []} radarPlaying={radarPlaying} radarFrameIndex={radarFrameIndex} gridResolutionKm={gridResolutionKm} weatherPoints={weather.points} onRadarError={() => setRadar((current) => ({ ...current, status: "error", message: "Radar image unavailable · radar hidden" }))} />
+          )}
+
+          <div className="map-atmosphere" style={{ pointerEvents: "none" }} />
+          {mapEngine === "svg" && <div className="map-grid" style={{ pointerEvents: "none" }} />}
+          <div className="map-vignette" style={{ pointerEvents: "none" }} />
+          <div className="map-label label-ne">INDIA / NATIONAL WEATHER MOSAIC</div>
+          <div className="map-label label-sw">06°30′N — 37°30′N <span>•</span> 2° GRID RESOLUTION</div>
+          {mapEngine === "svg" && (
+            <>
+              <div className="reticle" style={{ left: `${activeCell.x}%`, top: `${activeCell.y}%` }}><span>{activeCell.id}_88 / LOCK</span></div>
+              <div className="reticle reticle-secondary" style={{ left: `${frame.cells[1].x}%`, top: `${frame.cells[1].y}%` }}><span>18_62</span></div>
+            </>
+          )}
+          {mapEngine === "svg" && visibleCells.map((cell) => <div key={cell.id} className={`storm-cell cell-${cell.id} ${selectedCell?.id === cell.id ? "selected-cell" : ""}`} role="button" tabIndex={0} aria-pressed={selectedCell?.id === cell.id} aria-label={`Inspect grid cell ${cell.id} in ${districtFilter}`} style={{ left: `${cell.x}%`, top: `${cell.y}%`, width: `${cell.size}%`, height: `${cell.size * .72}%`, opacity: hazards.thunderstorm ? cell.intensity : 0 }} onMouseEnter={() => setHoveredCell(cell)} onMouseLeave={() => setHoveredCell(null)} onFocus={() => setHoveredCell(cell)} onBlur={() => setHoveredCell(null)} onClick={() => { setSelectedCell(cell); setSelectedGridDot(null); setShowInspector(true); }} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); setSelectedCell(cell); setSelectedGridDot(null); setShowInspector(true); } }}><div className="cell-core" style={{ opacity: hazards.cloudburst ? cell.intensity : 0 }} /><div className="cell-halo" style={{ opacity: hazards.hail ? cell.intensity : 0 }} /></div>)}
+          {mapEngine === "svg" && hoveredCell && hoveredTelemetry && <div className="cell-tooltip" style={{ left: `${hoveredCell.x}%`, top: `${hoveredCell.y}%` }}><div className="tooltip-kicker"><span><span className="tooltip-live" /> CELL HOVER / LIVE FRAME</span><b>{formatLead(lead)}</b></div><div className="tooltip-title"><strong>GRID #{hoveredCell.id}_88</strong><span>17.{String(385 + hoveredCell.id).slice(-3)}°N · 78.486°E</span></div><div className="tooltip-metrics"><span>REFLECTIVITY <b>{hoveredTelemetry.reflectivity}<i>dBZ</i></b></span><span>RAIN RATE <b>{hoveredTelemetry.rainRate}<i>mm/hr</i></b></span><span>HAIL PROB. <b>{hoveredTelemetry.hail}<i>%</i></b></span><span>WIND GUST <b>{hoveredTelemetry.wind}<i>km/h</i></b></span><span>LIGHTNING <b>{hoveredTelemetry.lightning}<i>/km²/10m</i></b></span></div><div className="tooltip-footer"><span>1.5 KM × 1.5 KM</span><span>SPATIAL ATTENTION {Math.round(hoveredCell.intensity * 100)}%</span></div></div>}
+          {hazards.lightning && <div className="lightning-trace trace-a"><Zap size={18} /></div>}
+          {hazards.lightning && <div className="lightning-trace trace-b"><Zap size={13} /></div>}
+
+          {focusedLocation && <div className="location-focus" style={{ left: `${focusedLocation.x}%`, top: `${focusedLocation.y}%` }}><span>{focusedLocation.name.toUpperCase()}</span></div>}
+
+          {/* Centered Radar Timeline Dock */}
+          <div className="radar-dock" aria-label="Radar timeline controls">
+            <div><span>RADAR TIMELINE</span><b>{radar.frames.length ? `${radarFrameIndex + 1}/${radar.frames.length}` : "--/--"}</b></div>
+            <button onClick={() => setRadarFrameIndex((current) => radar.frames.length ? (current - 1 + radar.frames.length) % radar.frames.length : 0)} aria-label="Previous radar frame"><ChevronLeft size={13} /></button>
+            <button className="radar-play" onClick={() => setRadarPlaying((value) => !value)} aria-label={radarPlaying ? "Pause radar animation" : "Play radar animation"}>{radarPlaying ? <Pause size={13} /> : <Play size={13} />}</button>
+            <button onClick={() => setRadarFrameIndex((current) => radar.frames.length ? (current + 1) % radar.frames.length : 0)} aria-label="Next radar frame"><ChevronRight size={13} /></button>
+            <span className="radar-dock-time">{radar.frames[radarFrameIndex]?.time ? formatDataTimestamp(radar.frames[radarFrameIndex].time) : "WAITING"}</span>
+            <label>GRID <select value={gridResolutionKm} onChange={(event) => setGridResolutionKm(Number(event.target.value) as 1 | 1.5 | 2 | 3)}><option value="1">1 KM</option><option value="1.5">1.5 KM</option><option value="2">2 KM</option><option value="3">3 KM</option></select></label>
+          </div>
+
+          {/* Centered Forecast Playback Dock */}
+          <section className={`playback-dock ${showForecast ? "" : "collapsed-playback"}`}>
+            <button className="playback-collapse" aria-label={showForecast ? "Collapse forecast playback" : "Expand forecast playback"} onClick={() => setShowForecast((value) => !value)}>
+              {showForecast ? "−" : "+ 05 / FORECAST PLAYBACK"}
+            </button>
+            {showForecast && (
+              <div className="playback-content">
+                <div className="playback-head">
+                  <div>
+                    <span className="panel-kicker">05 / FORECAST PLAYBACK</span>
+                    <h2>{formatLead(lead)} <i>·</i> {new Date(Date.now() + lead * 60000).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })} UTC</h2>
+                  </div>
+                  <div className="frame-status"><Radio size={13} /> FRAME {String(lead / 10 + 1).padStart(2, "0")} / 37</div>
+                </div>
+                <div className="trend-chart">
+                  {trend.map((height, index) => <div key={index} className={`trend-bar ${timeline[index] <= lead ? "filled" : ""}`} style={{ height: `${height}%` }} />)}
+                  <div className="trend-line" style={{ left: `${(lead / 360) * 100}%` }} />
+                </div>
+                <div className="timeline">
+                  <span className="timeline-label now">NOW</span>
+                  <div className="timeline-track">
+                    <input aria-label="Forecast timeline" type="range" min="0" max="360" step="10" value={lead} onChange={(event) => setLead(Number(event.target.value))} />
+                    <div className="timeline-ticks">
+                      {timeline.filter((minute) => minute % 60 === 0).map((minute) => <span key={minute} style={{ left: `${(minute / 360) * 100}%` }}>{minute === 0 ? "T+0" : `T+${minute / 60}H`}</span>)}
+                    </div>
+                  </div>
+                  <span className="timeline-label end">+6H</span>
+                </div>
+                <div className="playback-controls">
+                  <div className="transport">
+                    <button className="transport-button" onClick={() => setLead((value) => Math.max(0, value - 10))}><ChevronLeft size={16} /><span>−10M</span></button>
+                    <button className="play-button" aria-label={playing ? "Pause forecast" : "Play forecast"} onClick={() => setPlaying((value) => !value)}>{playing ? <Pause size={19} fill="currentColor" /> : <Play size={19} fill="currentColor" />}</button>
+                    <button className="transport-button" onClick={() => setLead((value) => Math.min(360, value + 10))}><span>+10M</span><ChevronRight size={16} /></button>
+                  </div>
+                  <div className="speed-toggle">
+                    <span>SPEED</span>
+                    {[1, 2, 5].map((value) => <button key={value} className={speed === value ? "active" : ""} onClick={() => setSpeed(value)}>{value}×</button>)}
+                  </div>
+                  <div className="playback-right">
+                    <span><Gauge size={14} /> THREAT PEAK</span>
+                    <b>{activeTarget.reflectivity} <small>dBZ</small></b>
+                    <span className="forecast-window"><BatteryCharging size={14} /> 06:00 WINDOW</span>
+                  </div>
+                </div>
+              </div>
+            )}
+          </section>
+        </div>
+
+        {/* ── RIGHT SIDEBAR: ALERTS, INSPECTOR, TELEMETRY, HISTORY, ALARMS ── */}
+        <aside className="right-sidebar" aria-label="Telemetry and Intelligence">
+          {/* 02 / PRIORITY TARGETS */}
+          <section className="sidebar-card">
+            <div className="panel-kicker">
+              <span>02 / PRIORITY TARGETS</span>
+              <span className="target-count" style={{ display: "flex", gap: "5px", alignItems: "center", color: "#ef928e" }}>
+                <Target size={12} /> 02 TARGETS
+              </span>
+            </div>
+
+            {/* Primary Target Card */}
+            <div className={`alert-card ${activeTarget.severity === "severe" ? "critical" : "warning"}`}>
+              <div className="alert-card-top">
+                <span className={`alert-badge ${activeTarget.severity === "severe" ? "red" : activeTarget.severity === "high" ? "orange" : "cyan"}`}>
+                  <span /> {activeTarget.statusLabel.toUpperCase()}
+                </span>
+                <span className="alert-id">TGT-{activeTarget.id.slice(0, 7).toUpperCase()}</span>
+              </div>
+              <h3>{activeTarget.name}</h3>
               <div className="alert-location">
-                {nearestMetar.icaoId} <span>·</span> {nearestMetar.lat.toFixed(2)}°N, {nearestMetar.lon.toFixed(2)}°E <span>·</span> {nearestMetar.elevationMeters}M MSL
+                {activeTarget.state} <span>·</span> {activeTarget.lat.toFixed(3)}°N, {activeTarget.lon.toFixed(3)}°E <span>·</span> {activeTarget.elevation}M MSL
               </div>
               <div className="alert-hazard">
-                <Wind size={15} />
-                <span>WIND {nearestMetar.windDirection}° @ {nearestMetar.windSpeedKm} KM/H</span>
+                <ScanLine size={15} />
+                <span>RADAR {activeTarget.reflectivity} dBZ</span>
                 <span className="slash">/</span>
-                <Gauge size={14} />
-                <span>GUST {nearestMetar.windGustKm} KM/H</span>
+                <CloudRain size={14} />
+                <span>{activeTarget.rainRate} mm/hr</span>
+                <span className="slash">/</span>
+                <Wind size={14} />
+                <span>{activeTarget.windGust} km/h</span>
               </div>
               <div className="eta-line">
-                <span>STATION RAW</span>
+                <span>NOWCAST (+30M)</span>
                 <strong style={{ fontSize: "10px", fontFamily: "'IBM Plex Mono', monospace" }}>
-                  {nearestMetar.rawOb ? nearestMetar.rawOb.slice(0, 32) : formatCountdown(etaSeconds.airport)}
+                  {activeTarget.predictions ? `${activeTarget.predictions.t30.reflectivityDbz} dBZ (${activeTarget.predictions.t30.trend.toUpperCase()})` : "TRACKING STABLE"}
                 </strong>
               </div>
               <div className="trajectory">
                 <ArrowUpRight size={14} />
-                <span>{nearestMetar.flightCategory} · {nearestMetar.temp}°C</span>
-                <b>QNH {nearestMetar.altimeter}</b>
+                <span>{activeTarget.predictions?.summary ? activeTarget.predictions.summary.slice(0, 36) + "..." : "CONVGRU ATTENTION ACTIVE"}</span>
+                <b>{activeTarget.severity.toUpperCase()}</b>
               </div>
-            </Panel>
-          ) : (
-            <Panel className="alert-card warning">
-              <div className="alert-card-top"><span className="alert-badge orange"><span /> TRACKING</span><span className="alert-id">TGT-021</span></div>
-              <h3>Central Regional Node</h3>
-              <div className="alert-location">{activeTarget.state} <span>·</span> Convective Mesh Linked</div>
-              <div className="alert-hazard"><CloudLightning size={15} /><span>Convective Tracking</span></div>
-              <div className="eta-line"><span>ETA</span><strong>{formatCountdown(etaSeconds.rail)}</strong></div>
-            </Panel>
-          );
-        })()}
-      </aside>
-
-      <Panel className={`inspector-panel ${showInspector ? "visible" : "hidden-panel"}`}>
-        <div className="panel-kicker">
-          <span>03 / GRID CELL INSPECTOR · {activeTarget.isMicro ? `${activeTarget.resolutionKm} KM MICRO-GRID CELL` : "NATIONWIDE CONVECTIVE GRID"}</span>
-          <button className="panel-collapse" onClick={() => setShowInspector(false)}><X size={14} /></button>
-        </div>
-
-        <div className="inspector-heading">
-          <div>
-            <h2>
-              {activeTarget.name}
-            </h2>
-            <span>
-              {activeTarget.state} <i /> {activeTarget.lat.toFixed(3)}°N, {activeTarget.lon.toFixed(3)}°E <i /> {activeTarget.isMicro ? `${activeTarget.resolutionKm} × ${activeTarget.resolutionKm} KM CELL` : "CONVECTIVE MESH"}
-            </span>
-          </div>
-          <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-            <span style={{
-              fontSize: "10px",
-              fontFamily: "'IBM Plex Mono', monospace",
-              padding: "3px 8px",
-              borderRadius: "4px",
-              background: activeTarget.severity === "severe" ? "rgba(239, 68, 68, 0.15)" : activeTarget.severity === "high" ? "rgba(249, 115, 22, 0.15)" : "rgba(56, 189, 248, 0.12)",
-              color: activeTarget.severity === "severe" ? "#EF4444" : activeTarget.severity === "high" ? "#F97316" : "#38BDF8",
-              border: `1px solid ${activeTarget.severity === "severe" ? "#EF4444" : activeTarget.severity === "high" ? "#F97316" : "#38BDF8"}`,
-              fontWeight: 600,
-            }}>
-              {activeTarget.statusLabel.toUpperCase()}
-            </span>
-            {activeTarget.isMicro && (
               <button
+                onClick={() => handleOpen3DView(selectedSector)}
                 style={{
-                  background: "rgba(56, 189, 248, 0.12)",
-                  border: "1px solid rgba(56, 189, 248, 0.3)",
-                  color: "#38BDF8",
-                  fontSize: "10px",
-                  padding: "3px 7px",
-                  borderRadius: "3px",
-                  cursor: "pointer",
+                  width: "100%",
+                  marginTop: "10px",
+                  padding: "7px 10px",
+                  background: "linear-gradient(135deg, rgba(6, 182, 212, 0.28) 0%, rgba(14, 165, 233, 0.48) 100%)",
+                  border: "1.5px solid #00F2FE",
+                  borderRadius: "4px",
+                  color: "#FFFFFF",
                   fontFamily: "'IBM Plex Mono', monospace",
+                  fontSize: "10px",
+                  fontWeight: 700,
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: "6px",
+                  boxShadow: "0 0 14px rgba(0, 242, 254, 0.4)",
+                  letterSpacing: "0.04em",
                 }}
-                onClick={() => {
-                  setSelectedMicroCell(null);
-                  toast.info(`Returned to Sector Focus: ${activeTarget.sectorName}`);
-                }}
-                title="Zoom back to parent sector"
               >
-                PARENT
+                <Box size={13} style={{ color: "#00F2FE" }} />
+                <span>⚡ 3D STREET VIEW & AREA PERSPECTIVE</span>
               </button>
-            )}
-            <button
-              style={{
-                background: "linear-gradient(135deg, rgba(6, 182, 212, 0.25) 0%, rgba(14, 165, 233, 0.4) 100%)",
-                border: "1px solid #38BDF8",
-                color: "#FFFFFF",
-                fontSize: "10px",
-                fontWeight: 700,
-                padding: "3px 8px",
-                borderRadius: "3px",
-                cursor: "pointer",
-                fontFamily: "'IBM Plex Mono', monospace",
-                display: "flex",
-                alignItems: "center",
-                gap: "4px",
-                boxShadow: "0 0 10px rgba(56, 189, 248, 0.3)",
-              }}
-              onClick={() => handleOpen3DView(selectedSector)}
-              title="Launch 3D Volumetric Digital Twin & Street View"
-            >
-              <Box size={12} />
-              <span>3D TWIN</span>
-            </button>
-            <MapPin size={18} style={{ color: "#38BDF8" }} />
-          </div>
-        </div>
-
-        {liveDotForecast?.current && (
-          <div style={{
-            background: "rgba(34, 197, 94, 0.08)",
-            border: "1px solid rgba(34, 197, 94, 0.3)",
-            borderRadius: "4px",
-            padding: "7px 10px",
-            marginBottom: "10px",
-            fontSize: "10px",
-            display: "flex",
-            flexWrap: "wrap",
-            gap: "10px",
-            alignItems: "center",
-            fontFamily: "'IBM Plex Mono', monospace"
-          }}>
-            <span style={{ color: "#22C55E", fontWeight: 700, display: "flex", alignItems: "center", gap: "4px" }}>
-              <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#22C55E", display: "inline-block" }} />
-              LIVE OPEN-METEO SOUNDING:
-            </span>
-            <span>TEMP: <b style={{ color: "#F8FAFC" }}>{liveDotForecast.current.temperature}°C</b></span>
-            <span>WEATHER: <b style={{ color: "#38BDF8" }}>{liveDotForecast.current.description}</b></span>
-            <span>PRECIP: <b>{liveDotForecast.current.precipitation} mm</b></span>
-            <span>CAPE: <b>{liveDotForecast.current.cape} J/kg</b></span>
-            <span>GUST: <b>{liveDotForecast.current.windGusts} km/h</b></span>
-            <span>0°C ISOTHERM: <b>{liveDotForecast.current.freezingLevelHeight}M</b></span>
-          </div>
-        )}
-
-        <div className="metric-grid">
-          <div>
-            <span>RADAR REFLECTIVITY (Z)</span>
-            <b className={activeTarget.reflectivity >= 50 ? "metric-red" : activeTarget.reflectivity >= 35 ? "metric-orange" : ""}>
-              {activeTarget.reflectivity}<small> dBZ</small>
-            </b>
-            <em>{activeTarget.reflectivity >= 50 ? "SEVERE CORE (≥50 dBZ)" : activeTarget.reflectivity >= 35 ? "STORM PERIMETER (≥35 dBZ)" : "REFLECTIVITY LEVEL"}</em>
-          </div>
-          <div>
-            <span>EST. RAIN RATE (M-P)</span>
-            <b className={activeTarget.rainRate >= 100 ? "metric-red" : activeTarget.rainRate >= 20 ? "metric-orange" : ""}>
-              {activeTarget.rainRate}<small> mm/hr</small>
-            </b>
-            <em>{activeTarget.rainRate >= 100 ? "CLOUDBURST ALERT (≥100 MM/HR)" : activeTarget.rainRate >= 20 ? "TORRENTIAL PRECIPITATION" : "MARSHALL-PALMER Z-R"}</em>
-          </div>
-          <div>
-            <span>CONVECTIVE CAPE</span>
-            <b className={activeTarget.cape >= 1500 ? "metric-red" : activeTarget.cape >= 1000 ? "metric-orange" : ""}>
-              {activeTarget.cape}<small> J/kg</small>
-            </b>
-            <em>{activeTarget.cape >= 1500 ? "EXPLOSIVE INSTABILITY (>1500)" : activeTarget.cape >= 1000 ? "THUNDERSTORM GENESIS (>1000)" : "MARGINAL ENERGY"}</em>
-          </div>
-          <div>
-            <span>LIFTED INDEX (LI)</span>
-            <b className={activeTarget.liftedIndex <= -4 ? "metric-red" : activeTarget.liftedIndex <= -2 ? "metric-orange" : ""}>
-              {activeTarget.liftedIndex}
-            </b>
-            <em>{activeTarget.liftedIndex <= -4 ? "EXTREME UPWARD FORCE (<-4)" : activeTarget.liftedIndex <= -2 ? "SEVERE UNSTABLE (<-2)" : "MARGINAL STABILITY"}</em>
-          </div>
-          <div>
-            <span>0°C FREEZING LEVEL</span>
-            <b className={activeTarget.hailProb >= 50 ? "metric-orange" : ""}>
-              4,180<small> M</small>
-            </b>
-            <em>{activeTarget.hailProb >= 50 ? "CORE REACHES 0°C (HAIL RISK)" : "WARM RAIN FRACTION"}</em>
-          </div>
-          <div>
-            <span>DOWNBURST / SQUALL GUST</span>
-            <b className={activeTarget.windGust >= 50 ? "metric-red" : ""}>
-              {activeTarget.windGust}<small> km/h</small>
-            </b>
-            <em className="metric-cyan">{activeTarget.windGust >= 50 ? "DOWNBURST SHEAR (>50 KM/H)" : "SURFACE WINDS"}</em>
-          </div>
-          <div>
-            <span>LIGHTNING DENSITY</span>
-            <b className={activeTarget.lightning > 5 ? "metric-purple" : ""}>
-              {activeTarget.lightning}<small> /km²/10m</small>
-            </b>
-            <em>{activeTarget.lightning > 5 ? "ACTIVE STRIKE DENSITY" : "LOW ELECTRICAL DENSITY"}</em>
-          </div>
-          <div>
-            <span>TERRAIN ELEVATION</span>
-            <b className="metric-green">
-              {activeTarget.elevation}<small> M</small>
-            </b>
-            <em>NASA SRTM / DEM TOPOGRAPHY</em>
-          </div>
-        </div>
-
-        {/* Dedicated Nowcast Predictions Section */}
-        {activeTarget.predictions && (
-          <div style={{
-            marginTop: "12px",
-            padding: "10px 12px",
-            background: "rgba(7, 17, 29, 0.75)",
-            border: "1px solid rgba(56, 189, 248, 0.2)",
-            borderRadius: "6px",
-          }}>
-            <div style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              marginBottom: "8px",
-              fontFamily: "'Space Grotesk', sans-serif",
-            }}>
-              <span style={{ fontSize: "11px", fontWeight: 700, color: "#38BDF8", letterSpacing: "0.5px" }}>
-                CONVGRU + ATTENTION 1-HOUR PREDICTIONS
-              </span>
-              <span style={{ fontSize: "10px", fontFamily: "'IBM Plex Mono', monospace", color: "#22C55E" }}>
-                AI CONFIDENCE {activeTarget.predictions.modelConfidence}%
-              </span>
             </div>
 
-            <div style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(4, 1fr)",
-              gap: "6px",
-              marginBottom: "8px",
-            }}>
-              {[
-                { lead: "+15M", data: activeTarget.predictions.t15 },
-                { lead: "+30M", data: activeTarget.predictions.t30 },
-                { lead: "+45M", data: activeTarget.predictions.t45 },
-                { lead: "+60M", data: activeTarget.predictions.t60 },
-              ].map(({ lead, data }) => (
-                <div key={lead} style={{
-                  background: "rgba(14, 36, 58, 0.6)",
-                  border: "1px solid rgba(255, 255, 255, 0.08)",
-                  borderRadius: "4px",
-                  padding: "6px 8px",
-                  textAlign: "center",
-                }}>
-                  <div style={{ fontSize: "9px", color: "#94A3B8", fontFamily: "'IBM Plex Mono', monospace", marginBottom: "2px" }}>
-                    {lead}
+            {/* Nearest METAR Card */}
+            {(() => {
+              const airportList = Object.values(liveMetarAirports);
+              const nearestMetar = airportList.length > 0
+                ? airportList.reduce((closest, curr) => {
+                    const distCurr = Math.hypot(curr.lat - activeTarget.lat, curr.lon - activeTarget.lon);
+                    const distClosest = Math.hypot(closest.lat - activeTarget.lat, closest.lon - activeTarget.lon);
+                    return distCurr < distClosest ? curr : closest;
+                  }, airportList[0])
+                : null;
+
+              return nearestMetar ? (
+                <div className={`alert-card ${nearestMetar.isShearAlert ? "critical" : "warning"}`} style={{ marginTop: "10px" }}>
+                  <div className="alert-card-top">
+                    <span className={`alert-badge ${nearestMetar.isShearAlert ? "red" : "orange"}`}>
+                      <span /> {nearestMetar.isShearAlert ? "SQUALL / SHEAR ALERT" : "REGIONAL METAR"}
+                    </span>
+                    <span className="alert-id">{nearestMetar.icaoId}</span>
                   </div>
-                  <div style={{
-                    fontSize: "13px",
-                    fontWeight: 700,
-                    fontFamily: "'IBM Plex Mono', monospace",
-                    color: data.reflectivityDbz >= 50 ? "#EF4444" : data.reflectivityDbz >= 35 ? "#F97316" : "#38BDF8",
-                  }}>
-                    {data.reflectivityDbz} <span style={{ fontSize: "9px" }}>dBZ</span>
+                  <h3>{nearestMetar.name ? nearestMetar.name.split(",")[0] : "Regional Airport"}</h3>
+                  <div className="alert-location">
+                    {nearestMetar.icaoId} <span>·</span> {nearestMetar.lat.toFixed(2)}°N, {nearestMetar.lon.toFixed(2)}°E <span>·</span> {nearestMetar.elevationMeters}M MSL
                   </div>
-                  <div style={{ fontSize: "9px", color: "#64748B", fontFamily: "'IBM Plex Mono', monospace" }}>
-                    {data.rainRateMmHr} mm/h
+                  <div className="alert-hazard">
+                    <Wind size={15} />
+                    <span>WIND {nearestMetar.windDirection}° @ {nearestMetar.windSpeedKm} KM/H</span>
+                    <span className="slash">/</span>
+                    <Gauge size={14} />
+                    <span>GUST {nearestMetar.windGustKm} KM/H</span>
                   </div>
-                  <div style={{
-                    fontSize: "8px",
-                    fontWeight: 600,
-                    marginTop: "3px",
-                    padding: "1px 4px",
-                    borderRadius: "2px",
-                    background: data.trend === "intensifying" ? "rgba(239,68,68,0.2)" : data.trend === "decaying" ? "rgba(34,197,94,0.2)" : "rgba(56,189,248,0.15)",
-                    color: data.trend === "intensifying" ? "#EF4444" : data.trend === "decaying" ? "#22C55E" : "#38BDF8",
-                  }}>
-                    {data.trend === "intensifying" ? "↗ RISING" : data.trend === "decaying" ? "↘ FALLING" : "→ STEADY"}
+                  <div className="eta-line">
+                    <span>STATION RAW</span>
+                    <strong style={{ fontSize: "10px", fontFamily: "'IBM Plex Mono', monospace" }}>
+                      {nearestMetar.rawOb ? nearestMetar.rawOb.slice(0, 32) : formatCountdown(etaSeconds.airport)}
+                    </strong>
+                  </div>
+                  <div className="trajectory">
+                    <ArrowUpRight size={14} />
+                    <span>{nearestMetar.flightCategory} · {nearestMetar.temp}°C</span>
+                    <b>QNH {nearestMetar.altimeter}</b>
                   </div>
                 </div>
-              ))}
+              ) : (
+                <div className="alert-card warning" style={{ marginTop: "10px" }}>
+                  <div className="alert-card-top"><span className="alert-badge orange"><span /> TRACKING</span><span className="alert-id">TGT-021</span></div>
+                  <h3>Central Regional Node</h3>
+                  <div className="alert-location">{activeTarget.state} <span>·</span> Convective Mesh Linked</div>
+                  <div className="alert-hazard"><CloudLightning size={15} /><span>Convective Tracking</span></div>
+                  <div className="eta-line"><span>ETA</span><strong>{formatCountdown(etaSeconds.rail)}</strong></div>
+                </div>
+              );
+            })()}
+          </section>
+
+          {/* 03 / GRID CELL INSPECTOR */}
+          <section className="sidebar-card">
+            <div className="panel-kicker">
+              <span>03 / GRID CELL INSPECTOR</span>
+              <button className="panel-collapse" onClick={() => setShowInspector((v) => !v)} style={{ cursor: "pointer" }}>
+                {showInspector ? "−" : "+"}
+              </button>
+            </div>
+
+            {showInspector && (
+              <>
+                <div className="inspector-heading" style={{ padding: "10px 0 12px" }}>
+                  <div>
+                    <h2>{activeTarget.name}</h2>
+                    <span>
+                      {activeTarget.state} <i /> {activeTarget.lat.toFixed(3)}°N, {activeTarget.lon.toFixed(3)}°E <i /> {activeTarget.isMicro ? `${activeTarget.resolutionKm} KM CELL` : "CONVECTIVE MESH"}
+                    </span>
+                  </div>
+                  <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                    <span style={{
+                      fontSize: "10px",
+                      fontFamily: "'IBM Plex Mono', monospace",
+                      padding: "3px 8px",
+                      borderRadius: "4px",
+                      background: activeTarget.severity === "severe" ? "rgba(239, 68, 68, 0.15)" : activeTarget.severity === "high" ? "rgba(249, 115, 22, 0.15)" : "rgba(56, 189, 248, 0.12)",
+                      color: activeTarget.severity === "severe" ? "#EF4444" : activeTarget.severity === "high" ? "#F97316" : "#38BDF8",
+                      border: `1px solid ${activeTarget.severity === "severe" ? "#EF4444" : activeTarget.severity === "high" ? "#F97316" : "#38BDF8"}`,
+                      fontWeight: 600,
+                    }}>
+                      {activeTarget.statusLabel.toUpperCase()}
+                    </span>
+                    {activeTarget.isMicro && (
+                      <button
+                        style={{
+                          background: "rgba(56, 189, 248, 0.12)",
+                          border: "1px solid rgba(56, 189, 248, 0.3)",
+                          color: "#38BDF8",
+                          fontSize: "10px",
+                          padding: "3px 7px",
+                          borderRadius: "3px",
+                          cursor: "pointer",
+                          fontFamily: "'IBM Plex Mono', monospace",
+                        }}
+                        onClick={() => {
+                          setSelectedMicroCell(null);
+                          toast.info(`Returned to Sector Focus: ${activeTarget.sectorName}`);
+                        }}
+                        title="Zoom back to parent sector"
+                      >
+                        PARENT
+                      </button>
+                    )}
+                    <button
+                      style={{
+                        background: "linear-gradient(135deg, rgba(6, 182, 212, 0.25) 0%, rgba(14, 165, 233, 0.4) 100%)",
+                        border: "1px solid #38BDF8",
+                        color: "#FFFFFF",
+                        fontSize: "10px",
+                        fontWeight: 700,
+                        padding: "3px 8px",
+                        borderRadius: "3px",
+                        cursor: "pointer",
+                        fontFamily: "'IBM Plex Mono', monospace",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "4px",
+                        boxShadow: "0 0 10px rgba(56, 189, 248, 0.3)",
+                      }}
+                      onClick={() => handleOpen3DView(selectedSector)}
+                      title="Launch 3D Volumetric Digital Twin & Street View"
+                    >
+                      <Box size={12} />
+                      <span>3D</span>
+                    </button>
+                  </div>
+                </div>
+
+                {liveDotForecast?.current && (
+                  <div style={{
+                    background: "rgba(34, 197, 94, 0.08)",
+                    border: "1px solid rgba(34, 197, 94, 0.3)",
+                    borderRadius: "4px",
+                    padding: "7px 10px",
+                    marginBottom: "10px",
+                    fontSize: "9px",
+                    display: "flex",
+                    flexWrap: "wrap",
+                    gap: "8px",
+                    alignItems: "center",
+                    fontFamily: "'IBM Plex Mono', monospace"
+                  }}>
+                    <span style={{ color: "#22C55E", fontWeight: 700, display: "flex", alignItems: "center", gap: "4px" }}>
+                      <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#22C55E", display: "inline-block" }} />
+                      OPEN-METEO SOUNDING:
+                    </span>
+                    <span>TEMP: <b style={{ color: "#F8FAFC" }}>{liveDotForecast.current.temperature}°C</b></span>
+                    <span>WEATHER: <b style={{ color: "#38BDF8" }}>{liveDotForecast.current.description}</b></span>
+                    <span>PRECIP: <b>{liveDotForecast.current.precipitation} mm</b></span>
+                    <span>CAPE: <b>{liveDotForecast.current.cape} J/kg</b></span>
+                    <span>GUST: <b>{liveDotForecast.current.windGusts} km/h</b></span>
+                  </div>
+                )}
+
+                <div className="metric-grid">
+                  <div>
+                    <span>RADAR REFLECTIVITY (Z)</span>
+                    <b className={activeTarget.reflectivity >= 50 ? "metric-red" : activeTarget.reflectivity >= 35 ? "metric-orange" : ""}>
+                      {activeTarget.reflectivity}<small> dBZ</small>
+                    </b>
+                    <em>{activeTarget.reflectivity >= 50 ? "SEVERE CORE" : activeTarget.reflectivity >= 35 ? "STORM PERIMETER" : "REFLECTIVITY"}</em>
+                  </div>
+                  <div>
+                    <span>EST. RAIN RATE (M-P)</span>
+                    <b className={activeTarget.rainRate >= 100 ? "metric-red" : activeTarget.rainRate >= 20 ? "metric-orange" : ""}>
+                      {activeTarget.rainRate}<small> mm/hr</small>
+                    </b>
+                    <em>{activeTarget.rainRate >= 100 ? "CLOUDBURST ALERT" : activeTarget.rainRate >= 20 ? "TORRENTIAL" : "Z-R CALC"}</em>
+                  </div>
+                  <div>
+                    <span>CONVECTIVE CAPE</span>
+                    <b className={activeTarget.cape >= 1500 ? "metric-red" : activeTarget.cape >= 1000 ? "metric-orange" : ""}>
+                      {activeTarget.cape}<small> J/kg</small>
+                    </b>
+                    <em>{activeTarget.cape >= 1500 ? "EXPLOSIVE INSTABILITY" : activeTarget.cape >= 1000 ? "THUNDERSTORM GENESIS" : "MARGINAL"}</em>
+                  </div>
+                  <div>
+                    <span>LIFTED INDEX (LI)</span>
+                    <b className={activeTarget.liftedIndex <= -4 ? "metric-red" : activeTarget.liftedIndex <= -2 ? "metric-orange" : ""}>
+                      {activeTarget.liftedIndex}
+                    </b>
+                    <em>{activeTarget.liftedIndex <= -4 ? "EXTREME UPWARD" : activeTarget.liftedIndex <= -2 ? "SEVERE UNSTABLE" : "MARGINAL"}</em>
+                  </div>
+                  <div>
+                    <span>0°C FREEZING LEVEL</span>
+                    <b className={activeTarget.hailProb >= 50 ? "metric-orange" : ""}>
+                      4,180<small> M</small>
+                    </b>
+                    <em>{activeTarget.hailProb >= 50 ? "HAIL RISK CORE" : "WARM FRACTION"}</em>
+                  </div>
+                  <div>
+                    <span>DOWNBURST GUST</span>
+                    <b className={activeTarget.windGust >= 50 ? "metric-red" : ""}>
+                      {activeTarget.windGust}<small> km/h</small>
+                    </b>
+                    <em className="metric-cyan">{activeTarget.windGust >= 50 ? "DOWNBURST SHEAR" : "SURFACE WINDS"}</em>
+                  </div>
+                  <div>
+                    <span>LIGHTNING DENSITY</span>
+                    <b className={activeTarget.lightning > 5 ? "metric-purple" : ""}>
+                      {activeTarget.lightning}<small> /km²/10m</small>
+                    </b>
+                    <em>{activeTarget.lightning > 5 ? "ACTIVE STRIKE" : "LOW DENSITY"}</em>
+                  </div>
+                  <div>
+                    <span>TERRAIN ELEVATION</span>
+                    <b className="metric-green">
+                      {activeTarget.elevation}<small> M</small>
+                    </b>
+                    <em>NASA SRTM DEM</em>
+                  </div>
+                </div>
+
+                {/* Nowcast Predictions Section */}
+                {activeTarget.predictions && (
+                  <div style={{
+                    marginTop: "10px",
+                    padding: "10px",
+                    background: "rgba(7, 17, 29, 0.75)",
+                    border: "1px solid rgba(56, 189, 248, 0.2)",
+                    borderRadius: "4px",
+                  }}>
+                    <div style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      marginBottom: "8px",
+                      fontFamily: "'Space Grotesk', sans-serif",
+                    }}>
+                      <span style={{ fontSize: "10px", fontWeight: 700, color: "#38BDF8", letterSpacing: "0.5px" }}>
+                        CONVGRU + ATTENTION 1-HOUR PREDICTIONS
+                      </span>
+                      <span style={{ fontSize: "9px", fontFamily: "'IBM Plex Mono', monospace", color: "#22C55E" }}>
+                        CONF {activeTarget.predictions.modelConfidence}%
+                      </span>
+                    </div>
+
+                    <div style={{
+                      display: "grid",
+                      gridTemplateColumns: "repeat(4, 1fr)",
+                      gap: "4px",
+                      marginBottom: "8px",
+                    }}>
+                      {[
+                        { lead: "+15M", data: activeTarget.predictions.t15 },
+                        { lead: "+30M", data: activeTarget.predictions.t30 },
+                        { lead: "+45M", data: activeTarget.predictions.t45 },
+                        { lead: "+60M", data: activeTarget.predictions.t60 },
+                      ].map(({ lead, data }) => (
+                        <div key={lead} style={{
+                          background: "rgba(14, 36, 58, 0.6)",
+                          border: "1px solid rgba(255, 255, 255, 0.08)",
+                          borderRadius: "3px",
+                          padding: "5px 4px",
+                          textAlign: "center",
+                        }}>
+                          <div style={{ fontSize: "8px", color: "#94A3B8", fontFamily: "'IBM Plex Mono', monospace", marginBottom: "2px" }}>
+                            {lead}
+                          </div>
+                          <div style={{
+                            fontSize: "12px",
+                            fontWeight: 700,
+                            fontFamily: "'IBM Plex Mono', monospace",
+                            color: data.reflectivityDbz >= 50 ? "#EF4444" : data.reflectivityDbz >= 35 ? "#F97316" : "#38BDF8",
+                          }}>
+                            {data.reflectivityDbz} <span style={{ fontSize: "8px" }}>dBZ</span>
+                          </div>
+                          <div style={{ fontSize: "8px", color: "#64748B", fontFamily: "'IBM Plex Mono', monospace" }}>
+                            {data.rainRateMmHr} mm/h
+                          </div>
+                          <div style={{
+                            fontSize: "7px",
+                            fontWeight: 600,
+                            marginTop: "2px",
+                            padding: "1px 2px",
+                            borderRadius: "2px",
+                            background: data.trend === "intensifying" ? "rgba(239,68,68,0.2)" : data.trend === "decaying" ? "rgba(34,197,94,0.2)" : "rgba(56,189,248,0.15)",
+                            color: data.trend === "intensifying" ? "#EF4444" : data.trend === "decaying" ? "#22C55E" : "#38BDF8",
+                          }}>
+                            {data.trend === "intensifying" ? "↗ UP" : data.trend === "decaying" ? "↘ DN" : "→ OK"}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div style={{
+                      fontSize: "9px",
+                      color: "#CBD5E1",
+                      fontFamily: "'IBM Plex Mono', monospace",
+                      background: "rgba(0, 0, 0, 0.25)",
+                      padding: "5px 7px",
+                      borderRadius: "3px",
+                      lineHeight: 1.4,
+                    }}>
+                      <b style={{ color: "#38BDF8" }}>INFERENCE: </b>
+                      {activeTarget.predictions.summary}
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
+          </section>
+
+          {/* 04 / MODEL TELEMETRY */}
+          <section className="sidebar-card">
+            <div className="panel-kicker">
+              <span>04 / MODEL TELEMETRY</span>
+              <span className={`telemetry-live ${weather.status === "error" && radar.status === "error" ? "telemetry-error" : ""}`}>
+                <span /> {weather.status === "live" || radar.status === "live" ? "STREAMING" : "FALLBACK"}
+              </span>
+            </div>
+            <div
+              className="model-row"
+              style={{ cursor: "pointer", margin: "8px 0" }}
+              onClick={() => { setSystemHubTab("ml"); setSystemHubOpen(true); }}
+              title="Click to view ConvGRU architecture, PyTorch training code & checkpoints"
+            >
+              <div className="model-icon"><Sparkles size={15} /></div>
+              <div>
+                <h2>ConvGRU <span>+ Spatial Attention</span></h2>
+                <p>TARGET: {activeTarget.name.toUpperCase()} · <b style={{ color: "#38BDF8" }}>CLICK FOR ARCHITECTURE</b></p>
+              </div>
+              <RefreshCw size={14} className="spin-slow" />
+            </div>
+
+            <button
+              onClick={() => setTrainingStudioOpen(true)}
+              style={{
+                width: "100%",
+                margin: "6px 0 8px 0",
+                padding: "8px 10px",
+                background: "linear-gradient(90deg, rgba(56, 189, 248, 0.22) 0%, rgba(34, 197, 94, 0.16) 100%)",
+                border: "1px solid #38BDF8",
+                borderRadius: "4px",
+                color: "#F8FAFC",
+                fontSize: "10px",
+                fontFamily: "'IBM Plex Mono', monospace",
+                fontWeight: 700,
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                boxShadow: "0 0 14px rgba(56, 189, 248, 0.18)",
+              }}
+              title="Open real-time training loss curves, operational metrics (CSI, POD, FAR), and interactive parameter tuner"
+            >
+              <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                <BrainCircuit size={14} style={{ color: "#38BDF8" }} />
+                <span>ML TRAINING STUDIO & LOSS</span>
+              </div>
+              <span style={{ color: "#22C55E", fontSize: "9px" }}>OPEN ↗</span>
+            </button>
+
+            <div className="telemetry-stats" style={{ gridTemplateColumns: "1fr 1fr 1fr", gap: "6px" }}>
+              <div>
+                <span>INFERENCE LATENCY</span>
+                <b>{frame.inferenceLatencyMs} <small>MS</small></b>
+              </div>
+              <div>
+                <span>LIVE CAPE</span>
+                <b>{activeTarget.cape ? activeTarget.cape.toFixed(0) : "1850"}<small> J/KG</small></b>
+                <em>LI: {activeTarget.liftedIndex ? activeTarget.liftedIndex.toFixed(1) : "-4.2"}°C</em>
+              </div>
+              <div>
+                <span>ONLINE B-MSE</span>
+                <b style={{ color: "#22C55E" }}>{onlineMetrics.currentBMSELoss}</b>
+                <em>CSI: {(onlineMetrics.csiScore * 100).toFixed(0)}%</em>
+              </div>
             </div>
 
             <div style={{
-              fontSize: "10px",
-              color: "#CBD5E1",
-              fontFamily: "'IBM Plex Mono', monospace",
-              background: "rgba(0, 0, 0, 0.25)",
+              margin: "8px 0",
               padding: "6px 8px",
+              background: "rgba(14, 36, 58, 0.4)",
+              border: "1px solid rgba(56, 189, 248, 0.2)",
               borderRadius: "4px",
-              lineHeight: 1.4,
+              fontSize: "9px",
+              fontFamily: "'IBM Plex Mono', monospace",
+              color: "#94A3B8",
+              lineHeight: "1.4",
             }}>
-              <b style={{ color: "#38BDF8" }}>MODEL INFERENCE: </b>
-              {activeTarget.predictions.summary}
+              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "2px" }}>
+                <span style={{ color: "#38BDF8", fontWeight: "bold" }}>ML VERIFICATION</span>
+                <span style={{ color: validationReport.isValid ? "#22C55E" : "#EF4444", fontWeight: "bold" }}>
+                  {validationReport.physicalBoundCheck === "PASS" ? "✓ CONSISTENT" : "CALIBRATING"}
+                </span>
+              </div>
+              <div>Z-R CONSISTENCY: <b style={{ color: "#F8FAFC" }}>{validationReport.zRConsistencyPercent}%</b></div>
+              <div>STREAM: <b style={{ color: "#22C55E" }}>{onlineMetrics.isLiveConditioned ? "OPEN-METEO + RAINVIEWER" : "ACTIVE"}</b></div>
             </div>
-          </div>
-        )}
-      </Panel>
 
-      <Panel className="telemetry-panel">
-        <div className="panel-kicker">
-          <span>04 / MODEL TELEMETRY</span>
-          <span className={`telemetry-live ${weather.status === "error" && radar.status === "error" ? "telemetry-error" : ""}`}>
-            <span /> {weather.status === "live" || radar.status === "live" ? "STREAMING" : "FALLBACK"}
-          </span>
-        </div>
-        <div
-          className="model-row"
-          style={{ cursor: "pointer" }}
-          onClick={() => { setSystemHubTab("ml"); setSystemHubOpen(true); }}
-          title="Click to view ConvGRU deep learning architecture, PyTorch training code & checkpoints"
-        >
-          <div className="model-icon"><Sparkles size={15} /></div>
-          <div>
-            <h2>ConvGRU <span>+ Spatial Attention</span></h2>
-            <p>TARGET: {activeTarget.name.toUpperCase()} · <b style={{ color: "#38BDF8" }}>CLICK FOR ML ARCHITECTURE</b></p>
-          </div>
-          <RefreshCw size={15} className="spin-slow" />
-        </div>
+            <div className="confidence" style={{ marginTop: "8px" }}>
+              <span>FRAME CONFIDENCE</span>
+              <div className="confidence-track">
+                <i style={{ width: `${activeTarget.predictions?.modelConfidence ?? frame.confidencePercent}%` }} />
+              </div>
+              <b>{activeTarget.predictions?.modelConfidence ?? frame.confidencePercent}%</b>
+            </div>
 
-        <button
-          onClick={() => setTrainingStudioOpen(true)}
-          style={{
-            width: "100%",
-            margin: "8px 0 10px 0",
-            padding: "8px 10px",
-            background: "linear-gradient(90deg, rgba(56, 189, 248, 0.22) 0%, rgba(34, 197, 94, 0.16) 100%)",
-            border: "1px solid #38BDF8",
-            borderRadius: "4px",
-            color: "#F8FAFC",
-            fontSize: "10px",
-            fontFamily: "'IBM Plex Mono', monospace",
-            fontWeight: 700,
-            cursor: "pointer",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            boxShadow: "0 0 14px rgba(56, 189, 248, 0.18)",
-          }}
-          title="Open real-time training loss curves, operational metrics (CSI, POD, FAR), and interactive parameter tuner"
-        >
-          <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-            <BrainCircuit size={14} style={{ color: "#38BDF8" }} />
-            <span>ML TRAINING STUDIO & LOSS DETAILS</span>
-          </div>
-          <span style={{ color: "#22C55E", fontSize: "9px" }}>OPEN STUDIO ↗</span>
-        </button>
-        <div className="telemetry-stats">
-          <div>
-            <span>INFERENCE LATENCY</span>
-            <b>{frame.inferenceLatencyMs} <small>MS</small></b>
-          </div>
-          <div>
-            <span>LIVE CAPE / INSTABILITY</span>
-            <b>{activeTarget.cape ? activeTarget.cape.toFixed(0) : "1850"}<small> J/KG</small></b>
-            <em>LI: {activeTarget.liftedIndex ? activeTarget.liftedIndex.toFixed(1) : "-4.2"}°C</em>
-          </div>
-          <div>
-            <span>ONLINE B-MSE LOSS</span>
-            <b style={{ color: "#22C55E" }}>{onlineMetrics.currentBMSELoss}</b>
-            <em>CSI: {(onlineMetrics.csiScore * 100).toFixed(0)}% · POD: {onlineMetrics.podScore}%</em>
-          </div>
-        </div>
-        <div style={{
-          margin: "8px 0",
-          padding: "6px 8px",
-          background: "rgba(14, 36, 58, 0.4)",
-          border: "1px solid rgba(56, 189, 248, 0.2)",
-          borderRadius: "4px",
-          fontSize: "10px",
-          fontFamily: "'IBM Plex Mono', monospace",
-          color: "#94A3B8",
-          lineHeight: "1.4",
-        }}>
-          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "2px" }}>
-            <span style={{ color: "#38BDF8", fontWeight: "bold" }}>ML LIVE VERIFICATION</span>
-            <span style={{ color: validationReport.isValid ? "#22C55E" : "#EF4444", fontWeight: "bold" }}>
-              {validationReport.physicalBoundCheck === "PASS" ? "✓ PHYSICALLY CONSISTENT" : "CALIBRATING"}
-            </span>
-          </div>
-          <div>Z-R MARSHALL-PALMER: <b style={{ color: "#F8FAFC" }}>{validationReport.zRConsistencyPercent}% MATCH</b></div>
-          <div>DATA INGESTION: <b style={{ color: "#22C55E" }}>{onlineMetrics.isLiveConditioned ? "LIVE OPEN-METEO & RAINVIEWER" : "ACTIVE STREAM"}</b></div>
-        </div>
-        <div className="confidence">
-          <span>FRAME CONFIDENCE</span>
-          <div className="confidence-track">
-            <i style={{ width: `${activeTarget.predictions?.modelConfidence ?? frame.confidencePercent}%` }} />
-          </div>
-          <b>{activeTarget.predictions?.modelConfidence ?? frame.confidencePercent}%</b>
-        </div>
-        <div className="source-strip">
-          <span className="data-provenance">ALERT BASIS: 2D CONVGRU + SPATIAL ATTENTION · 5 CONVECTIVE HAZARD RULES</span>
-          <span className={weather.status}><i /> WEATHER {weather.status.toUpperCase()}</span>
-          <span className={radar.status}><i /> RADAR {radar.status.toUpperCase()}</span>
-          <small>{formatDataTimestamp(weather.updatedAt)} · {formatDataTimestamp(radar.updatedAt)}</small>
-        </div>
-      </Panel>
+            <div className="source-strip" style={{ marginTop: "8px", paddingTop: "6px" }}>
+              <span className="data-provenance">2D CONVGRU + ATTENTION · 5 HAZARD RULES</span>
+              <span className={weather.status}><i /> WEATHER {weather.status.toUpperCase()}</span>
+              <span className={radar.status}><i /> RADAR {radar.status.toUpperCase()}</span>
+            </div>
+          </section>
 
-      <TelemetryPanels cellId={activeCell?.id ?? 14} date={historyDate} maxDate={archiveDate(3)} hour={historyHour} history={history} thresholds={thresholds} alarmsEnabled={alarmsEnabled} activeAlerts={thresholdAlerts} alertLog={alertLog} historyOpen={showHistory} onToggleHistory={() => setShowHistory((value) => !value)} onDateChange={(value) => { setHistoryDate(value); setHistoryHour(12); }} onHourChange={setHistoryHour} onThresholdChange={(key, value) => setThresholds((current) => ({ ...current, [key]: value }))} onToggleAlarms={() => setAlarmsEnabled((value) => !value)} onEnableNotifications={() => { if ("Notification" in window && Notification.permission === "default") Notification.requestPermission(); toast.info("Browser alerts ready", { description: "VAJRA will notify when the selected cell crosses an armed threshold." }); }} />
-      <section className={`playback-dock ${showForecast ? "" : "collapsed-playback"}`}><button className="playback-collapse" aria-label={showForecast ? "Collapse forecast playback" : "Expand forecast playback"} onClick={() => setShowForecast((value) => !value)}>{showForecast ? "−" : "+ 05 / FORECAST"}</button>{showForecast && <div className="playback-content"><div className="playback-head"><div><span className="panel-kicker">05 / FORECAST PLAYBACK</span><h2>{formatLead(lead)} <i>·</i> {new Date(Date.now() + lead * 60000).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })} UTC</h2></div><div className="frame-status"><Radio size={13} /> FRAME {String(lead / 10 + 1).padStart(2, "0")} / 37</div></div><div className="trend-chart">{trend.map((height, index) => <div key={index} className={`trend-bar ${timeline[index] <= lead ? "filled" : ""}`} style={{ height: `${height}%` }} />)}<div className="trend-line" style={{ left: `${(lead / 360) * 100}%` }} /></div><div className="timeline"><span className="timeline-label now">NOW</span><div className="timeline-track"><input aria-label="Forecast timeline" type="range" min="0" max="360" step="10" value={lead} onChange={(event) => setLead(Number(event.target.value))} /><div className="timeline-ticks">{timeline.filter((minute) => minute % 60 === 0).map((minute) => <span key={minute} style={{ left: `${(minute / 360) * 100}%` }}>{minute === 0 ? "T+0" : `T+${minute / 60}H`}</span>)}</div></div><span className="timeline-label end">+6H</span></div><div className="playback-controls"><div className="transport"><button className="transport-button" onClick={() => setLead((value) => Math.max(0, value - 10))}><ChevronLeft size={16} /><span>−10M</span></button><button className="play-button" aria-label={playing ? "Pause forecast" : "Play forecast"} onClick={() => setPlaying((value) => !value)}>{playing ? <Pause size={19} fill="currentColor" /> : <Play size={19} fill="currentColor" />}</button><button className="transport-button" onClick={() => setLead((value) => Math.min(360, value + 10))}><span>+10M</span><ChevronRight size={16} /></button></div><div className="speed-toggle"><span>SPEED</span>{[1, 2, 5].map((value) => <button key={value} className={speed === value ? "active" : ""} onClick={() => setSpeed(value)}>{value}×</button>)}</div><div className="playback-right"><span><Gauge size={14} /> THREAT PEAK</span><b>{activeTarget.reflectivity} <small>dBZ</small></b><span className="forecast-window"><BatteryCharging size={14} /> 06:00 WINDOW</span></div></div></div>}</section>
+          {/* 05 & 06: HISTORICAL PLAYBACK & SEVERE WEATHER ALARMS */}
+          <TelemetryPanels
+            cellId={activeCell?.id ?? 14}
+            date={historyDate}
+            maxDate={archiveDate(3)}
+            hour={historyHour}
+            history={history}
+            thresholds={thresholds}
+            alarmsEnabled={alarmsEnabled}
+            activeAlerts={thresholdAlerts}
+            alertLog={alertLog}
+            historyOpen={showHistory}
+            onToggleHistory={() => setShowHistory((value) => !value)}
+            onDateChange={(value) => { setHistoryDate(value); setHistoryHour(12); }}
+            onHourChange={setHistoryHour}
+            onThresholdChange={(key, value) => setThresholds((current) => ({ ...current, [key]: value }))}
+            onToggleAlarms={() => setAlarmsEnabled((value) => !value)}
+            onEnableNotifications={() => {
+              if ("Notification" in window && Notification.permission === "default") Notification.requestPermission();
+              toast.info("Browser alerts ready", { description: "VAJRA will notify when the selected cell crosses an armed threshold." });
+            }}
+          />
+        </aside>
+      </div>
 
+      {/* ── 3. BOTTOM FOOTER BAR ── */}
       <footer className="bottom-footer">
         <span>VAJRA / ATMOSPHERIC INTELLIGENCE SYSTEM</span>
         <span><ShieldAlert size={12} /> {weather.status === "live" || radar.status === "live" ? "LIVE WEATHER + RADAR" : "SIMULATION FALLBACK"} <i /> REFRESH 05:00</span>
@@ -1648,6 +1824,7 @@ export default function Home() {
         <span>BUILD 2.4.18 <Settings2 size={12} /></span>
       </footer>
 
+      {/* ── 4. SYSTEM MODALS ── */}
       <SystemHubModal
         isOpen={systemHubOpen}
         onClose={() => setSystemHubOpen(false)}

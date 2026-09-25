@@ -262,36 +262,67 @@ export function useLiveGridData(): LiveGridState {
       }
 
       // Merge live data into sectors
-      const updatedSectors = sectors.map((sector) => {
+      let updatedSectors = sectors.map((sector) => {
         const live = liveUpdates.get(sector.id);
         if (!live) return sector;
         return { ...sector, ...live } as IndianGridSector;
       });
 
-      if (liveUpdates.size > 0) {
-        // Continuous ML Self-Learning: Stream real atmospheric soundings to XGBoost & LightGBM
-        const observations = Array.from(liveUpdates.entries()).map(([sectorId, live]) => {
-          const sector = sectors.find((s) => s.id === sectorId);
-          return {
-            sector_id: sectorId,
-            reflectivity: live.reflectivityDbz ?? sector?.reflectivityDbz ?? 30,
-            rain_rate: live.rainRateMmHr ?? sector?.rainRateMmHr ?? 5,
-            cape: live.capeJkg ?? sector?.capeJkg ?? 1500,
-            li: live.liftedIndex ?? sector?.liftedIndex ?? -3,
-            freezing_level: live.freezingLevelMeters ?? sector?.freezingLevelMeters ?? 4200,
-            wind_gust: live.windGustKmh ?? sector?.windGustKmh ?? 35,
-            hail_prob: live.hailProbability ?? sector?.hailProbability ?? 10,
-            temp: live.temperatureC ?? sector?.temperatureC ?? 28,
-            humidity: live.humidityPercent ?? sector?.humidityPercent ?? 75,
-            elevation: live.elevationMeters ?? sector?.elevationMeters ?? 400,
-          };
-        });
+      // Prepare comprehensive observation payload for ALL 64 nationwide Indian sectors
+      const allSectorsObservations = updatedSectors.map((sector) => ({
+        sector_id: sector.id,
+        id: sector.id,
+        reflectivity: sector.reflectivityDbz ?? 30,
+        rain_rate: sector.rainRateMmHr ?? 5,
+        cape: sector.capeJkg ?? 1500,
+        li: sector.liftedIndex ?? -3,
+        freezing_level: sector.freezingLevelMeters ?? 4200,
+        wind_gust: sector.windGustKmh ?? 35,
+        hail_prob: sector.hailProbability ?? 10,
+        temp: sector.temperatureC ?? 28,
+        humidity: sector.humidityPercent ?? 75,
+        elevation: sector.elevationMeters ?? 400,
+      }));
 
-        fetch("/api/ml/continuous-learn/ingest", {
+      // 1. Continuous ML Self-Learning: Ingest real soundings for all 64 sectors into training engine
+      fetch("/api/ml/continuous-learn/ingest", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ observations: allSectorsObservations }),
+      }).catch(() => {});
+
+      // 2. Nationwide Batch Inference: Evaluate latest self-learned checkpoints across ALL 64 grids
+      try {
+        const predRes = await fetch("/api/ml/predict-all-grids", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ observations }),
-        }).catch(() => {});
+          body: JSON.stringify({ sectors: allSectorsObservations }),
+          signal: controller.signal,
+        });
+
+        if (predRes.ok) {
+          const predData = await predRes.json();
+          const predictionsMap = predData.predictions_by_sector || {};
+
+          updatedSectors = updatedSectors.map((sec) => {
+            const p = predictionsMap[sec.id];
+            if (p) {
+              return {
+                ...sec,
+                mlThunderstormProb: p.thunderstorm_prob,
+                mlCloudburstProb: p.cloudburst_prob,
+                mlHailProb: p.hail_prob,
+                mlMicroburstProb: p.microburst_prob,
+                mlProvenHazard: p.is_proven_hazard,
+                mlDominantThreat: p.dominant_threat,
+                mlEvaluatedAt: new Date().toISOString(),
+              };
+            }
+            return sec;
+          });
+        }
+      } catch {
+        // Non-blocking fallback if ML inference service takes longer than network tick
       }
 
       setState({

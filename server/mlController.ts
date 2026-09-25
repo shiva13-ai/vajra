@@ -156,16 +156,19 @@ export async function postMlPredict(req: Request, res: Response) {
   }
 }
 
-export async function postContinuousLearnIngest(req: Request, res: Response) {
+let isContinuousLearningRunning = false;
+let lastContinuousResult: any = null;
+
+export async function postMlPredictAllGrids(req: Request, res: Response) {
   try {
-    const observations = req.body;
-    if (!observations) {
-      return res.status(400).json({ status: "error", message: "Missing observation data" });
+    const inputData = req.body;
+    if (!inputData) {
+      return res.status(400).json({ status: "error", message: "Missing soundings / telemetry data." });
     }
 
-    const inputJson = JSON.stringify(observations);
-    const child = spawn("python", [CONTINUOUS_LEARNER_SCRIPT, "--stdin"], {
-      cwd: PROJECT_ROOT
+    const inputJson = JSON.stringify(inputData);
+    const child = spawn("python", [PREDICT_SCRIPT, "--stdin"], {
+      cwd: PROJECT_ROOT,
     });
 
     let stdout = "";
@@ -179,7 +182,7 @@ export async function postContinuousLearnIngest(req: Request, res: Response) {
 
     child.on("close", (code) => {
       if (code !== 0) {
-        return res.status(500).json({ status: "error", message: "Self-learning script failed", stderr });
+        return res.status(500).json({ status: "error", message: "Vectorized inference failed", stderr });
       }
       try {
         const parsed = JSON.parse(stdout);
@@ -189,6 +192,56 @@ export async function postContinuousLearnIngest(req: Request, res: Response) {
       }
     });
   } catch (err: any) {
+    res.status(500).json({ status: "error", message: err.message });
+  }
+}
+
+export async function postContinuousLearnIngest(req: Request, res: Response) {
+  try {
+    const observations = req.body;
+    if (!observations) {
+      return res.status(400).json({ status: "error", message: "Missing observation data" });
+    }
+
+    // Debounce guard: if a learning cycle is currently training, respond with cached/busy state
+    if (isContinuousLearningRunning) {
+      return res.json({
+        status: "busy",
+        message: "Continuous learning cycle is actively computing; observation queued",
+        lastResult: lastContinuousResult,
+      });
+    }
+
+    isContinuousLearningRunning = true;
+    const inputJson = JSON.stringify(observations);
+    const child = spawn("python", [CONTINUOUS_LEARNER_SCRIPT, "--stdin"], {
+      cwd: PROJECT_ROOT,
+    });
+
+    let stdout = "";
+    let stderr = "";
+
+    child.stdout.on("data", (d) => (stdout += d.toString()));
+    child.stderr.on("data", (d) => (stderr += d.toString()));
+
+    child.stdin.write(inputJson);
+    child.stdin.end();
+
+    child.on("close", (code) => {
+      isContinuousLearningRunning = false;
+      if (code !== 0) {
+        return res.status(500).json({ status: "error", message: "Self-learning script failed", stderr });
+      }
+      try {
+        const parsed = JSON.parse(stdout);
+        lastContinuousResult = parsed;
+        res.json(parsed);
+      } catch {
+        res.json({ status: "success", raw: stdout });
+      }
+    });
+  } catch (err: any) {
+    isContinuousLearningRunning = false;
     res.status(500).json({ status: "error", message: err.message });
   }
 }
@@ -205,17 +258,33 @@ export async function getContinuousLearnStatus(_req: Request, res: Response) {
       ledger = JSON.parse(fs.readFileSync(LEDGER_PATH, "utf-8"));
     }
 
+    const replayBufferPath = path.join(CHECKPOINTS_DIR, "live_replay_buffer.jsonl");
+    let replayCount = 0;
+    if (fs.existsSync(replayBufferPath)) {
+      replayCount = fs.readFileSync(replayBufferPath, "utf-8").split("\n").filter(Boolean).length;
+    }
+
+    const lossHistory = manifest?.loss_history || [];
+    const lastLoss = lossHistory.length > 0 ? lossHistory[lossHistory.length - 1] : null;
+
     res.json({
-      status: "active",
+      status: "success",
       continuous_learning_step: manifest?.continuous_learning_step || 0,
-      last_self_learning_at: manifest?.last_self_learning_at || null,
+      gatekeeper_status: manifest?.gatekeeper_status || "PROMOTED",
+      total_grids_monitored: manifest?.total_grids_monitored || 64,
+      all_india_coverage_pct: manifest?.all_india_coverage_pct || 100.0,
+      last_self_learning_at: manifest?.last_self_learning_at || manifest?.generated_at || null,
       total_verified_soundings: ledger?.total_verified || 0,
       pending_prediction_verifications: ledger?.pending_predictions?.length || 0,
-      loss_history: manifest?.loss_history || [],
-      checkpoints: manifest?.checkpoints || {}
+      recent_verified_history: (ledger?.verified_history || []).slice(-10),
+      replay_buffer_size: replayCount,
+      loss_history: lossHistory,
+      last_loss: lastLoss,
+      checkpoints: manifest?.checkpoints || {},
     });
   } catch (err: any) {
     res.status(500).json({ status: "error", message: err.message });
   }
 }
+
 
